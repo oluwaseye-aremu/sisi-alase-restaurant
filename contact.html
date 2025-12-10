@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Lumière</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="ticker-wrap">
+            <div class="ticker">
+                <div class="ticker-item">Welcome to Lumière - Experience the finest dining in the city.</div>
+                <div class="ticker-item">New Seasonal Menu Now Available!</div>
+                <div class="ticker-item">Live Jazz every Friday night.</div>
+                <div class="ticker-item">Book your private events with us today.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Lumière</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+                <li><a href="contact.html#reservations" class="btn-reserve">Book a Table</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Section 1: Header -->
+    <header class="page-header section bg-dark text-center" style="padding-top: 8rem; padding-bottom: 4rem;">
+        <div class="container">
+            <h1 class="text-white">Get in Touch</h1>
+            <p class="text-white">We'd love to hear from you.</p>
+        </div>
+    </header>
+
+    <!-- Section 2: Contact Info -->
+    <section class="section">
+        <div class="container">
+            <div class="grid-3">
+                <div class="text-center">
+                    <i class="fas fa-phone fa-2x mb-1" style="color: var(--primary-color);"></i>
+                    <h3>Phone</h3>
+                    <p>+1 (555) 123-4567</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-envelope fa-2x mb-1" style="color: var(--primary-color);"></i>
+                    <h3>Email</h3>
+                    <p>info@lumiere-restaurant.com</p>
+                </div>
+                <div class="text-center">
+                    <i class="fas fa-map-marker-alt fa-2x mb-1" style="color: var(--primary-color);"></i>
+                    <h3>Address</h3>
+                    <p>123 Culinary Ave, Food City, FC 90210</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Reservation Form -->
+    <section class="section bg-light" id="reservations">
+        <div class="container">
+            <h2 class="section-title text-center">Make a Reservation</h2>
+            <form class="contact-form" style="max-width: 600px; margin: 0 auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <input type="text" placeholder="Name" required
+                        style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
+                    <input type="email" placeholder="Email" required
+                        style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                    <input type="date" required style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
+                    <input type="time" required style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
+                </div>
+                <input type="number" placeholder="Number of Guests" required
+                    style="width: 100%; padding: 1rem; border: 1px solid #ddd; margin-top: 1rem;">
+                <textarea placeholder="Special Requests" rows="4"
+                    style="width: 100%; padding: 1rem; border: 1px solid #ddd; margin-top: 1rem;"></textarea>
+                <button type="submit" class="btn btn-primary mt-2" style="width: 100%;">Book Table</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Section 4: Map -->
+    <section class="section no-padding">
+        <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.1422937950147!2d-73.98731968482413!3d40.75889497932681!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1622549400000!5m2!1sen!2sus"
+            width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </section>
+
+    <!-- Section 5: Private Dining -->
+    <section class="section">
+        <div class="container">
+            <div class="row">
+                <div class="col-text">
+                    <h2 class="section-title">Private Dining</h2>
+                    <p>Host your next event in our exclusive private dining room. Perfect for corporate events,
+                        birthdays, and anniversaries. Seating for up to 40 guests.</p>
+                    <a href="packages.html" class="btn btn-secondary mt-1">View Packages</a>
+                </div>
+                <div class="col-image">
+                    <img src="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                        alt="Private Dining" class="img-responsive rounded shadow">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Press/Media -->
+    <section class="section bg-light">
+        <div class="container text-center">
+            <h2 class="section-title">Press & Media</h2>
+            <p>For media inquiries, please contact our PR team.</p>
+            <a href="mailto:press@lumiere.com" class="text-link">press@lumiere.com</a>
+        </div>
+    </section>
+
+    <!-- Section 7: Careers -->
+    <section class="section">
+        <div class="container text-center">
+            <h2 class="section-title">Careers</h2>
+            <p>Join our passionate team. We are always looking for talented individuals.</p>
+            <div class="mt-2">
+                <span class="badge" style="background: #eee; padding: 0.5rem 1rem; margin: 0.5rem;">Sous Chef</span>
+                <span class="badge" style="background: #eee; padding: 0.5rem 1rem; margin: 0.5rem;">Server</span>
+                <span class="badge" style="background: #eee; padding: 0.5rem 1rem; margin: 0.5rem;">Host/Hostess</span>
+            </div>
+            <a href="#" class="btn btn-outline mt-2" style="color: #333; border-color: #333;">Apply Now</a>
+        </div>
+    </section>
+
+    <!-- Section 8: Social Media -->
+    <section class="section bg-dark text-white">
+        <div class="container text-center">
+            <h2 class="section-title text-white">Follow Us</h2>
+            <p>Stay connected with us on social media for daily updates.</p>
+            <div class="social-icons mt-2">
+                <a href="#"><i class="fab fa-facebook-f fa-2x"></i></a>
+                <a href="#"><i class="fab fa-instagram fa-2x"></i></a>
+                <a href="#"><i class="fab fa-twitter fa-2x"></i></a>
+                <a href="#"><i class="fab fa-tiktok fa-2x"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 9: Feedback -->
+    <section class="section">
+        <div class="container text-center">
+            <h2 class="section-title">We Value Your Feedback</h2>
+            <p>How was your experience? Let us know.</p>
+            <a href="#" class="text-link">Take our 2-minute survey</a>
+        </div>
+    </section>
+
+    <!-- Section 10: Newsletter -->
+    <section class="section bg-accent text-white">
+        <div class="container text-center">
+            <h2 class="section-title text-white">Stay Updated</h2>
+            <p>Subscribe to our newsletter for the latest news and offers.</p>
+            <form class="newsletter-form">
+                <input type="email" placeholder="Your Email Address" required>
+                <button type="submit" class="btn btn-dark">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>Lumière</h2>
+                    <p>Exquisite dining in the heart of the city.</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom text-center">
+                <p>&copy; 2024 Lumière Restaurant. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
