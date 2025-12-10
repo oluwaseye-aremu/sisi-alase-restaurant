@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | Lumière</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .cart-container {
+            max-width: 1000px;
+            margin: 8rem auto 4rem;
+            padding: 2rem;
+        }
+
+        .cart-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .cart-header h1 {
+            font-size: 2.5rem;
+            color: #1a1a1a;
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .cart-empty i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .cart-items {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto auto;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-item-image img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .cart-item-details h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-price {
+            font-size: 1.3rem;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: 2px solid #d4af37;
+            background: white;
+            color: #d4af37;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background: #d4af37;
+            color: white;
+        }
+
+        .quantity-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #a93226;
+        }
+
+        .cart-summary {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #d4af37;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: #d4af37;
+            color: #1a1a1a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .checkout-btn:hover {
+            background: #c0a030;
+            transform: translateY(-2px);
+        }
+
+        .continue-shopping {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.8rem 2rem;
+            background: #1a1a1a;
+            color: #d4af37;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .continue-shopping:hover {
+            background: #333;
+        }
+
+        @media (max-width: 768px) {
+            .cart-item {
+                grid-template-columns: 80px 1fr;
+                gap: 1rem;
+            }
+
+            .cart-item-controls {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: space-between;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Lumière</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="cart-container">
+        <div class="cart-header">
+            <h1>🛒 Your Cart</h1>
+        </div>
+
+        <!-- Empty Cart -->
+        <div id="empty-cart" class="cart-empty" style="display: none;">
+            <i class="fas fa-shopping-cart"></i>
+            <h2>Your cart is empty</h2>
+            <p>Add some delicious items from our menu!</p>
+            <a href="menu.html" class="btn btn-primary" style="margin-top: 2rem; display: inline-block;">Browse Menu</a>
+        </div>
+
+        <!-- Cart Items -->
+        <div id="cart-content" style="display: none;">
+            <div class="cart-items" id="cart-items-container"></div>
+
+            <div class="cart-summary">
+                <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Tax (10%):</span>
+                    <span id="tax">$0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery:</span>
+                    <span id="delivery">$5.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Total:</span>
+                    <span id="total">$0.00</span>
+                </div>
+                <button class="checkout-btn" onclick="proceedToCheckout()">
+                    Proceed to Checkout <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="menu.html" class="continue-shopping">
+                    <i class="fas fa-arrow-left"></i> Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+        function displayCart() {
+            if (cart.length === 0) {
+                document.getElementById('empty-cart').style.display = 'block';
+                document.getElementById('cart-content').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('empty-cart').style.display = 'none';
+            document.getElementById('cart-content').style.display = 'block';
+
+            const container = document.getElementById('cart-items-container');
+            container.innerHTML = cart.map((item, index) => `
+                <div class="cart-item">
+                    <div class="cart-item-image">
+                        <img src="${API_URL.replace('/api', '')}${item.image_url}" alt="${item.title}">
+                    </div>
+                    <div class="cart-item-details">
+                        <h3>${item.title}</h3>
+                        <div class="cart-item-price">$${item.price.toFixed(2)} each</div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                        <span class="quantity-value">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                    </div>
+                    <div class="cart-item-controls">
+                        <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                        <button class="remove-btn" onclick="removeItem(${index})">
+                            <i class="fas fa-trash"></i> Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateSummary();
+        }
+
+        function updateQuantity(index, change) {
+            cart[index].quantity += change;
+
+            if (cart[index].quantity <= 0) {
+                cart.splice(index, 1);
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            displayCart();
+        }
+
+        function removeItem(index) {
+            if (confirm('Remove this item from cart?')) {
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                displayCart();
+            }
+        }
+
+        function updateSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const tax = subtotal * 0.10;
+            const delivery = cart.length > 0 ? 5.00 : 0;
+            const total = subtotal + tax + delivery;
+
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+            document.getElementById('delivery').textContent = `$${delivery.toFixed(2)}`;
+            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+            window.location.href = 'checkout.html';
+        }
+
+        // Initialize
+        displayCart();
+    </script>
+</body>
+
+</html>
