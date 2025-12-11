@@ -5,17 +5,407 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us | Lumière</title>
-    <link rel="stylesheet" href="/css/style.csss">
+
+    <link rel="stylesheet" href="css/style.css">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
         rel="stylesheet">
+
+    <style>
+        /* --- INTERNAL STYLES TO GUARANTEE NAVBAR LOOKS GOOD --- */
+        /* These act as a backup if style.css is missing or caching */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* Top Bar / Ticker */
+        .top-bar {
+            background: #000;
+            color: #d4af37;
+            padding: 0.5rem 0;
+            font-size: 0.85rem;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .ticker {
+            display: inline-block;
+            animation: ticker 30s linear infinite;
+        }
+
+        .ticker-item {
+            display: inline-block;
+            padding: 0 2rem;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: rgba(26, 26, 26, 0.95);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #d4af37;
+        }
+
+        .btn-reserve {
+            border: 1px solid #d4af37;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0;
+            /* Sharp edges for luxury feel */
+            transition: all 0.3s;
+        }
+
+        .btn-reserve:hover {
+            background: #d4af37;
+            color: #000 !important;
+        }
+
+        /* --- CONTACT PAGE SPECIFIC STYLES --- */
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: #d4af37;
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            /* Info takes less space, form takes more */
+            gap: 4rem;
+            margin: 4rem 0;
+            align-items: start;
+        }
+
+        /* Info Cards */
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: white;
+            padding: 1.5rem;
+            border-left: 4px solid #d4af37;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .info-icon {
+            font-size: 1.5rem;
+            color: #d4af37;
+            width: 40px;
+            text-align: center;
+        }
+
+        .info-content h3 {
+            font-family: 'Playfair Display', serif;
+            color: #1a1a1a;
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-content p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Form */
+        .contact-form-wrapper {
+            background: white;
+            padding: 3rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header h2 {
+            font-family: 'Playfair Display', serif;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            font-family: 'Lato', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            background: #fff;
+            border-color: #d4af37;
+            outline: none;
+        }
+
+        .btn-submit {
+            background: #d4af37;
+            color: #1a1a1a;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #c0a030;
+        }
+
+        /* Map */
+        .map-section {
+            margin-bottom: 4rem;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 400px;
+            background: #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* Footer */
+        .footer {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer h2 {
+            color: #d4af37;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 1rem;
+        }
+
+        .footer h3 {
+            color: #d4af37;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer ul {
+            list-style: none;
+        }
+
+        .footer ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer ul li a {
+            color: #ccc;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .footer ul li a:hover {
+            color: #d4af37;
+        }
+
+        .social-icons a {
+            color: #fff;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            transition: 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: #d4af37;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            /* Mobile menu handled by JS/external CSS usually */
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-toggle {
+                display: block;
+                background: none;
+                border: none;
+                cursor: pointer;
+            }
+
+            .hamburger {
+                display: block;
+                width: 25px;
+                height: 3px;
+                background: #d4af37;
+                position: relative;
+            }
+
+            .hamburger::before,
+            .hamburger::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 3px;
+                background: #d4af37;
+                left: 0;
+            }
+
+            .hamburger::before {
+                top: -8px;
+            }
+
+            .hamburger::after {
+                top: 8px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .nav-toggle {
+                display: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="ticker-wrap">
             <div class="ticker">
@@ -27,13 +417,14 @@
         </div>
     </div>
 
-    <!-- Navigation -->
     <nav class="navbar">
-        <div class="container nav-container">
+        <div class="nav-container">
             <a href="index.html" class="logo">Lumière</a>
+
             <button class="nav-toggle" aria-label="Toggle navigation">
                 <span class="hamburger"></span>
             </button>
+
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="menu.html">Menu</a></li>
@@ -43,152 +434,105 @@
                 <li>
                     <a href="cart.html" style="position: relative;">
                         <i class="fas fa-shopping-cart"></i>
-                        <span id="cart-count" style="display: none;"></span>
+                        <span id="cart-count"
+                            style="display: none; position: absolute; top: -8px; right: -10px; background: #c0392b; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; justify-content: center; align-items: center;">0</span>
                     </a>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <!-- Section 1: Header -->
-    <header class="page-header section bg-dark text-center" style="padding-top: 8rem; padding-bottom: 4rem;">
+    <header class="page-header">
         <div class="container">
-            <h1 class="text-white">Get in Touch</h1>
-            <p class="text-white">We'd love to hear from you.</p>
+            <h1>Contact Us</h1>
+            <p>We'd love to hear from you. Get in touch for reservations or inquiries.</p>
         </div>
     </header>
 
-    <!-- Section 2: Contact Info -->
     <section class="section">
         <div class="container">
-            <div class="grid-3">
-                <div class="text-center">
-                    <i class="fas fa-phone fa-2x mb-1" style="color: var(--primary-color);"></i>
-                    <h3>Phone</h3>
-                    <p>+1 (555) 123-4567</p>
+            <div class="contact-grid">
+
+                <div class="contact-info">
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="info-content">
+                            <h3>Location</h3>
+                            <p>123 Culinary Avenue,<br>Metropolis, NY 10012</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-phone-alt"></i></div>
+                        <div class="info-content">
+                            <h3>Phone</h3>
+                            <p>Reservations: (555) 123-4567<br>Events: (555) 987-6543</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-clock"></i></div>
+                        <div class="info-content">
+                            <h3>Opening Hours</h3>
+                            <p>Mon-Thu: 5pm - 10pm<br>Fri-Sat: 5pm - 11pm<br>Sun: 4pm - 9:30pm</p>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="info-content">
+                            <h3>Email</h3>
+                            <p>info@lumiere-restaurant.com<br>events@lumiere-restaurant.com</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center">
-                    <i class="fas fa-envelope fa-2x mb-1" style="color: var(--primary-color);"></i>
-                    <h3>Email</h3>
-                    <p>info@lumiere-restaurant.com</p>
+
+                <div class="contact-form-wrapper" id="reservations">
+                    <form class="contact-form"
+                        onsubmit="event.preventDefault(); alert('Message sent! We will contact you shortly.');">
+                        <div class="form-header">
+                            <h2>Send us a Message</h2>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Name</label>
+                            <input type="text" placeholder="Your Name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" placeholder="Your Email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Subject</label>
+                            <select>
+                                <option>General Inquiry</option>
+                                <option>Table Reservation</option>
+                                <option>Private Event</option>
+                                <option>Feedback</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Message</label>
+                            <textarea rows="5" placeholder="How can we help you?" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Send Message</button>
+                    </form>
                 </div>
-                <div class="text-center">
-                    <i class="fas fa-map-marker-alt fa-2x mb-1" style="color: var(--primary-color);"></i>
-                    <h3>Address</h3>
-                    <p>123 Culinary Ave, Food City, FC 90210</p>
-                </div>
+            </div>
+        </div>
+
+        <div class="container map-section">
+            <div class="map-container">
+                <iframe src="https://maps.google.com/maps?q=Central%20Park&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                    allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </section>
 
-    <!-- Section 3: Reservation Form -->
-    <section class="section bg-light" id="reservations">
-        <div class="container">
-            <h2 class="section-title text-center">Make a Reservation</h2>
-            <form class="contact-form" style="max-width: 600px; margin: 0 auto;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                    <input type="text" placeholder="Name" required
-                        style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
-                    <input type="email" placeholder="Email" required
-                        style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                    <input type="date" required style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
-                    <input type="time" required style="width: 100%; padding: 1rem; border: 1px solid #ddd;">
-                </div>
-                <input type="number" placeholder="Number of Guests" required
-                    style="width: 100%; padding: 1rem; border: 1px solid #ddd; margin-top: 1rem;">
-                <textarea placeholder="Special Requests" rows="4"
-                    style="width: 100%; padding: 1rem; border: 1px solid #ddd; margin-top: 1rem;"></textarea>
-                <button type="submit" class="btn btn-primary mt-2" style="width: 100%;">Book Table</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Section 4: Map -->
-    <section class="section no-padding">
-        <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.1422937950147!2d-73.98731968482413!3d40.75889497932681!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1622549400000!5m2!1sen!2sus"
-            width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-    </section>
-
-    <!-- Section 5: Private Dining -->
-    <section class="section">
-        <div class="container">
-            <div class="row">
-                <div class="col-text">
-                    <h2 class="section-title">Private Dining</h2>
-                    <p>Host your next event in our exclusive private dining room. Perfect for corporate events,
-                        birthdays, and anniversaries. Seating for up to 40 guests.</p>
-                    <a href="packages.html" class="btn btn-secondary mt-1">View Packages</a>
-                </div>
-                <div class="col-image">
-                    <img src="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                        alt="Private Dining" class="img-responsive rounded shadow">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section 6: Press/Media -->
-    <section class="section bg-light">
-        <div class="container text-center">
-            <h2 class="section-title">Press & Media</h2>
-            <p>For media inquiries, please contact our PR team.</p>
-            <a href="mailto:press@lumiere.com" class="text-link">press@lumiere.com</a>
-        </div>
-    </section>
-
-    <!-- Section 7: Careers -->
-    <section class="section">
-        <div class="container text-center">
-            <h2 class="section-title">Careers</h2>
-            <p>Join our passionate team. We are always looking for talented individuals.</p>
-            <div class="mt-2">
-                <span class="badge" style="background: #eee; padding: 0.5rem 1rem; margin: 0.5rem;">Sous Chef</span>
-                <span class="badge" style="background: #eee; padding: 0.5rem 1rem; margin: 0.5rem;">Server</span>
-                <span class="badge" style="background: #eee; padding: 0.5rem 1rem; margin: 0.5rem;">Host/Hostess</span>
-            </div>
-            <a href="#" class="btn btn-outline mt-2" style="color: #333; border-color: #333;">Apply Now</a>
-        </div>
-    </section>
-
-    <!-- Section 8: Social Media -->
-    <section class="section bg-dark text-white">
-        <div class="container text-center">
-            <h2 class="section-title text-white">Follow Us</h2>
-            <p>Stay connected with us on social media for daily updates.</p>
-            <div class="social-icons mt-2">
-                <a href="#"><i class="fab fa-facebook-f fa-2x"></i></a>
-                <a href="#"><i class="fab fa-instagram fa-2x"></i></a>
-                <a href="#"><i class="fab fa-twitter fa-2x"></i></a>
-                <a href="#"><i class="fab fa-tiktok fa-2x"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section 9: Feedback -->
-    <section class="section">
-        <div class="container text-center">
-            <h2 class="section-title">We Value Your Feedback</h2>
-            <p>How was your experience? Let us know.</p>
-            <a href="#" class="text-link">Take our 2-minute survey</a>
-        </div>
-    </section>
-
-    <!-- Section 10: Newsletter -->
-    <section class="section bg-accent text-white">
-        <div class="container text-center">
-            <h2 class="section-title text-white">Stay Updated</h2>
-            <p>Subscribe to our newsletter for the latest news and offers.</p>
-            <form class="newsletter-form">
-                <input type="email" placeholder="Your Email Address" required>
-                <button type="submit" class="btn btn-dark">Subscribe</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -214,13 +558,14 @@
                     </div>
                 </div>
             </div>
-            <div class="footer-bottom text-center">
+            <div class="footer-bottom">
                 <p>&copy; 2024 Lumière Restaurant. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="js/script.js"></script>
+    <script src="js/menu-dynamic.js"></script>
 </body>
 
 </html>
