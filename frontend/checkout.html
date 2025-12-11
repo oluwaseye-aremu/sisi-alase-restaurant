@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Lumière</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
     <style>
         * {
             margin: 0;
@@ -122,17 +122,6 @@
             cursor: not-allowed;
         }
 
-        #card-element {
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .card-errors {
-            color: #c0392b;
-            margin-top: 0.5rem;
-        }
-
         .success-message {
             background: #d1e7dd;
             color: #0f5132;
@@ -153,6 +142,15 @@
             margin: 1rem 0;
         }
 
+        .error-message {
+            background: #f8d7da;
+            color: #842029;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .checkout-grid {
                 grid-template-columns: 1fr;
@@ -171,6 +169,8 @@
             <!-- Customer Information -->
             <div class="section">
                 <h2>Customer Information</h2>
+                <div id="error-message" class="error-message"></div>
+
                 <form id="checkout-form">
                     <div class="form-group">
                         <label>Full Name *</label>
@@ -184,7 +184,7 @@
 
                     <div class="form-group">
                         <label>Phone Number *</label>
-                        <input type="tel" id="customer-phone" required>
+                        <input type="tel" id="customer-phone" required placeholder="+234 800 000 0000">
                     </div>
 
                     <div class="form-group">
@@ -192,15 +192,8 @@
                         <input type="text" id="customer-address" required>
                     </div>
 
-                    <h2 style="margin-top: 2rem;">Payment Information</h2>
-                    <div class="form-group">
-                        <label>Card Details *</label>
-                        <div id="card-element"></div>
-                        <div id="card-errors" class="card-errors"></div>
-                    </div>
-
                     <button type="submit" class="btn" id="submit-button">
-                        <span id="button-text">Place Order & Pay</span>
+                        <span id="button-text">Pay with Paystack</span>
                         <span id="spinner" style="display: none;">Processing...</span>
                     </button>
                 </form>
@@ -212,7 +205,7 @@
                 <div id="cart-items"></div>
                 <div class="total">
                     <span>Total:</span>
-                    <span id="total-amount">$0.00</span>
+                    <span id="total-amount">₦0.00</span>
                 </div>
             </div>
         </div>
@@ -226,10 +219,10 @@
                     Tracking ID: <span id="tracking-id-display"></span>
                 </div>
                 <p>You can track your order using this tracking ID.</p>
-                <a href="tracking.html" class="btn"
+                <a href="/frontend/tracking.html" class="btn"
                     style="display: inline-block; text-decoration: none; margin-top: 1rem; width: auto; padding: 1rem 2rem;">Track
                     Order</a>
-                <a href="menu.html" class="btn"
+                <a href="/frontend/menu.html" class="btn"
                     style="display: inline-block; text-decoration: none; margin-top: 1rem; width: auto; padding: 1rem 2rem; margin-left: 1rem; background: #1a1a1a; color: #d4af37;">Back
                     to Menu</a>
             </div>
@@ -238,23 +231,7 @@
 
     <script>
         const API_URL = 'http://localhost:8080/api';
-        const STRIPE_PUBLISHABLE_KEY = 'pk_test_YOUR_KEY_HERE'; // Replace with your Stripe publishable key
-
-        // Initialize Stripe
-        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-        const elements = stripe.elements();
-        const cardElement = elements.create('card');
-        cardElement.mount('#card-element');
-
-        // Handle card errors
-        cardElement.on('change', (event) => {
-            const displayError = document.getElementById('card-errors');
-            if (event.error) {
-                displayError.textContent = event.error.message;
-            } else {
-                displayError.textContent = '';
-            }
-        });
+        const PAYSTACK_PUBLIC_KEY = 'pk_test_YOUR_KEY_HERE'; // Replace with your Paystack public key
 
         // Load cart from localStorage
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -271,12 +248,12 @@
                             <h3>${item.title}</h3>
                             <p>Quantity: ${item.quantity}</p>
                         </div>
-                        <div class="item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="item-price">₦${(item.price * item.quantity).toFixed(2)}</div>
                     </div>
                 `;
             }).join('');
 
-            document.getElementById('total-amount').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('total-amount').textContent = `₦${total.toFixed(2)}`;
             return total;
         }
 
@@ -287,10 +264,12 @@
             const submitButton = document.getElementById('submit-button');
             const buttonText = document.getElementById('button-text');
             const spinner = document.getElementById('spinner');
+            const errorMessage = document.getElementById('error-message');
 
             submitButton.disabled = true;
             buttonText.style.display = 'none';
             spinner.style.display = 'inline';
+            errorMessage.style.display = 'none';
 
             const customerName = document.getElementById('customer-name').value;
             const customerEmail = document.getElementById('customer-email').value;
@@ -299,63 +278,72 @@
             const totalAmount = displayCart();
 
             try {
-                // Create payment intent
-                const intentResponse = await fetch(`${API_URL}/payment/create-intent`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: totalAmount })
-                });
+                // Initialize Paystack payment
+                const handler = PaystackPop.setup({
+                    key: PAYSTACK_PUBLIC_KEY,
+                    email: customerEmail,
+                    amount: totalAmount * 100, // Paystack expects amount in kobo (multiply by 100)
+                    currency: 'NGN',
+                    ref: 'ORD-' + Math.floor((Math.random() * 1000000000) + 1),
+                    metadata: {
+                        custom_fields: [
+                            {
+                                display_name: "Customer Name",
+                                variable_name: "customer_name",
+                                value: customerName
+                            },
+                            {
+                                display_name: "Phone Number",
+                                variable_name: "phone_number",
+                                value: customerPhone
+                            }
+                        ]
+                    },
+                    callback: async function (response) {
+                        // Payment successful
+                        console.log('Payment successful:', response);
 
-                const { clientSecret } = await intentResponse.json();
+                        // Create order
+                        const orderResponse = await fetch(`${API_URL}/orders`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                customer_name: customerName,
+                                customer_email: customerEmail,
+                                customer_phone: customerPhone,
+                                items: JSON.stringify(cart),
+                                total_amount: totalAmount,
+                                payment_status: 'paid',
+                                payment_reference: response.reference
+                            })
+                        });
 
-                // Confirm card payment
-                const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-                    payment_method: {
-                        card: cardElement,
-                        billing_details: {
-                            name: customerName,
-                            email: customerEmail,
-                            phone: customerPhone,
-                            address: { line1: customerAddress }
-                        }
+                        const order = await orderResponse.json();
+
+                        // Show success message
+                        document.getElementById('checkout-section').style.display = 'none';
+                        document.getElementById('success-section').style.display = 'block';
+                        document.getElementById('tracking-id-display').textContent = order.tracking_id;
+
+                        // Clear cart
+                        localStorage.removeItem('cart');
+                    },
+                    onClose: function () {
+                        // Payment closed/cancelled
+                        submitButton.disabled = false;
+                        buttonText.style.display = 'inline';
+                        spinner.style.display = 'none';
+                        errorMessage.textContent = 'Payment was cancelled. Please try again.';
+                        errorMessage.style.display = 'block';
                     }
                 });
 
-                if (error) {
-                    document.getElementById('card-errors').textContent = error.message;
-                    submitButton.disabled = false;
-                    buttonText.style.display = 'inline';
-                    spinner.style.display = 'none';
-                    return;
-                }
-
-                // Payment successful, create order
-                const orderResponse = await fetch(`${API_URL}/orders`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customer_name: customerName,
-                        customer_email: customerEmail,
-                        customer_phone: customerPhone,
-                        items: JSON.stringify(cart),
-                        total_amount: totalAmount,
-                        payment_status: 'paid'
-                    })
-                });
-
-                const order = await orderResponse.json();
-
-                // Show success message
-                document.getElementById('checkout-section').style.display = 'none';
-                document.getElementById('success-section').style.display = 'block';
-                document.getElementById('tracking-id-display').textContent = order.tracking_id;
-
-                // Clear cart
-                localStorage.removeItem('cart');
+                handler.openIframe();
 
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
                 submitButton.disabled = false;
                 buttonText.style.display = 'inline';
                 spinner.style.display = 'none';
