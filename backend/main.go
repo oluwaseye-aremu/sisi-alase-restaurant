@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bytes" // Add this to your imports
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -11,14 +11,31 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings" // Added for JWT
 	"time"
 
+	"github.com/golang-jwt/jwt/v5" // Added for JWT
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 )
 
 var db *sql.DB
+
+// --- JWT CONFIGURATION START ---
+var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+
+type Credentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type Claims struct {
+	Username string `json:"username"`
+	jwt.RegisteredClaims
+}
+
+// --- JWT CONFIGURATION END ---
 
 // Models
 type MenuItem struct {
@@ -118,6 +135,79 @@ func createTables() {
 	}
 	log.Println("Tables created successfully!")
 }
+
+// --- AUTHENTICATION HANDLERS START ---
+
+func adminLogin(w http.ResponseWriter, r *http.Request) {
+	var creds Credentials
+	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	// Check against Environment Variables
+	expectedUser := os.Getenv("ADMIN_USERNAME")
+	expectedPass := os.Getenv("ADMIN_PASSWORD")
+
+	if expectedUser == "" || expectedPass == "" {
+		http.Error(w, "Server configuration error: Admin credentials not set", http.StatusInternalServerError)
+		return
+	}
+
+	if creds.Username != expectedUser || creds.Password != expectedPass {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Create the JWT Token
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		Username: creds.Username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		http.Error(w, "Error generating token", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"token": tokenString,
+	})
+}
+
+// Middleware to verify JWT token
+func isAuthorized(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Missing Authorization Header", http.StatusUnauthorized)
+			return
+		}
+
+		// Remove "Bearer " prefix
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		claims := &Claims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtKey, nil
+		})
+
+		if err != nil || !token.Valid {
+			http.Error(w, "Invalid Token", http.StatusUnauthorized)
+			return
+		}
+
+		next(w, r)
+	}
+}
+
+// --- AUTHENTICATION HANDLERS END ---
 
 // API Handlers
 
@@ -340,12 +430,13 @@ func createOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create initial tracking entry
-	_, err = db.Exec(
+	// Using trackErr to ensure safe compilation (avoiding "unused variable" warnings)
+	_, trackErr := db.Exec(
 		"INSERT INTO order_tracking (order_id, status, location, update_message) VALUES ($1, $2, $3, $4)",
 		order.ID, "Order Placed", "Restaurant", "Your order has been received and is being prepared.",
 	)
-	if err != nil {
-		http.Error(w, "Failed to create tracking entry: "+err.Error(), http.StatusInternalServerError)
+	if trackErr != nil {
+		http.Error(w, "Failed to create tracking entry: "+trackErr.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -459,17 +550,20 @@ func main() {
 
 	router := mux.NewRouter()
 
-	// API Routes
+	// --- PUBLIC API ROUTES ---
 	router.HandleFunc("/api/menu", getMenuItems).Methods("GET")
-	router.HandleFunc("/api/menu", addMenuItem).Methods("POST")
-	router.HandleFunc("/api/menu/{id}", deleteMenuItem).Methods("DELETE")
-
-	router.HandleFunc("/api/payment/initialize", initializePayment).Methods("POST")
-	router.HandleFunc("/api/payment/verify", verifyPayment).Methods("GET")
 	router.HandleFunc("/api/orders", createOrder).Methods("POST")
-	router.HandleFunc("/api/orders", getAllOrders).Methods("GET")
 	router.HandleFunc("/api/orders/tracking/{tracking_id}", getOrderByTracking).Methods("GET")
-	router.HandleFunc("/api/orders/{id}/tracking", updateOrderTracking).Methods("POST")
+	router.HandleFunc("/api/payment/create-intent", verifyPayment).Methods("POST")
+
+	// Login Route (Returns the JWT Token)
+	router.HandleFunc("/api/login", adminLogin).Methods("POST")
+
+	// --- PROTECTED ADMIN ROUTES (Require JWT) ---
+	router.HandleFunc("/api/menu", isAuthorized(addMenuItem)).Methods("POST")
+	router.HandleFunc("/api/menu/{id}", isAuthorized(deleteMenuItem)).Methods("DELETE")
+	router.HandleFunc("/api/orders", isAuthorized(getAllOrders)).Methods("GET")
+	router.HandleFunc("/api/orders/{id}/tracking", isAuthorized(updateOrderTracking)).Methods("POST")
 
 	// Serve uploaded images
 	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
