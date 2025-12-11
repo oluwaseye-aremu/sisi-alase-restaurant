@@ -220,13 +220,16 @@
         const API_URL = 'http://localhost:8080/api';
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
+        // 1. INITIALIZATION
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const reference = urlParams.get('reference');
 
             if (reference) {
+                // We are coming back from Paystack
                 verifyTransaction(reference);
             } else {
+                // We are starting a new checkout
                 loadCart();
                 const savedData = JSON.parse(sessionStorage.getItem('checkout_data'));
                 if (savedData) {
@@ -237,6 +240,7 @@
             }
         });
 
+        // 2. LOAD CART UI
         function loadCart() {
             if (cart.length === 0) {
                 alert("Your cart is empty!");
@@ -259,17 +263,15 @@
                 `;
             }).join('');
 
-            // DELIVERY FEE LOGIC (Adjusted for Naira)
-            // Example: 1500 Naira delivery fee
+            // Fixed Delivery Fee in Naira (1500)
             const delivery = 1500;
             const finalTotal = total + delivery;
 
-            // Display with Commas (e.g., ₦5,000)
             document.getElementById('total-amount').textContent = `₦${finalTotal.toLocaleString()}`;
-
             sessionStorage.setItem('order_total', finalTotal);
         }
 
+        // 3. HANDLE PAYMENT SUBMISSION
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -278,10 +280,13 @@
             const phone = document.getElementById('phone').value;
             const amount = parseFloat(sessionStorage.getItem('order_total'));
 
+            // Store data for when we return
             sessionStorage.setItem('checkout_data', JSON.stringify({ name, email, phone }));
+
             showLoading('Initializing Payment...');
 
             try {
+                // Initialize Payment
                 const response = await fetch(`${API_URL}/payment/initialize`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -290,43 +295,62 @@
 
                 const data = await response.json();
 
-                if (data.status && data.data.authorization_url) {
+                if (data.status && data.data && data.data.authorization_url) {
                     window.location.href = data.data.authorization_url;
                 } else {
-                    throw new Error('Failed to initialize payment');
+                    console.error("Init Error:", data);
+                    throw new Error(data.message || 'Failed to initialize payment');
                 }
             } catch (error) {
                 console.error(error);
-                showError('Payment initialization failed. Please try again.');
+                showError(`Error: ${error.message}`);
                 hideLoading();
             }
         });
 
+        // 4. VERIFY TRANSACTION
         async function verifyTransaction(reference) {
             showLoading('Verifying Payment...');
             document.getElementById('checkout-view').style.display = 'none';
 
             try {
+                // Call Backend Verification
                 const verifyResp = await fetch(`${API_URL}/payment/verify?reference=${reference}`);
-                const verifyData = await verifyResp.json();
 
-                if (verifyData.status && verifyData.data.status === 'success') {
+                if (!verifyResp.ok) {
+                    throw new Error(`Server returned ${verifyResp.status}`);
+                }
+
+                const verifyData = await verifyResp.json();
+                console.log("Verification Response:", verifyData); // Check console for this if it fails
+
+                // Safe check: ensure 'data' exists before checking 'status'
+                if (verifyData.status && verifyData.data && verifyData.data.status === 'success') {
                     await createOrder();
                 } else {
-                    throw new Error('Payment verification failed');
+                    const msg = verifyData.message || 'Payment verification failed at Paystack';
+                    throw new Error(msg);
                 }
             } catch (error) {
-                console.error(error);
-                showError('Payment failed or could not be verified.');
+                console.error("Verification Error:", error);
+                showError(`Payment Failed: ${error.message}`);
                 hideLoading();
                 document.getElementById('checkout-view').style.display = 'block';
             }
         }
 
+        // 5. CREATE ORDER
         async function createOrder() {
             showLoading('Creating Order...');
+
+            // Retrieve stored data
             const customerData = JSON.parse(sessionStorage.getItem('checkout_data'));
             const amount = parseFloat(sessionStorage.getItem('order_total'));
+
+            // Safety check: Did we lose the session data?
+            if (!customerData) {
+                throw new Error("Session expired. Please fill in your details again.");
+            }
 
             const orderData = {
                 customer_name: customerData.name,
@@ -346,18 +370,24 @@
 
                 if (response.ok) {
                     const order = await response.json();
+
                     document.getElementById('tracking-id').textContent = order.tracking_id;
                     document.getElementById('success-view').style.display = 'block';
+
+                    // Cleanup
                     localStorage.removeItem('cart');
                     sessionStorage.removeItem('checkout_data');
                     sessionStorage.removeItem('order_total');
                     hideLoading();
                 } else {
-                    throw new Error('Failed to create order');
+                    const errText = await response.text();
+                    throw new Error('Order creation failed: ' + errText);
                 }
             } catch (error) {
-                showError('Payment successful, but order creation failed. Please contact support.');
+                console.error("Order Error:", error);
+                showError(error.message);
                 hideLoading();
+                document.getElementById('checkout-view').style.display = 'block';
             }
         }
 
@@ -374,7 +404,6 @@
             const el = document.getElementById('error-message');
             el.textContent = msg;
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
         }
     </script>
 </body>
