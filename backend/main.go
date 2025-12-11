@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes" // Add this to your imports
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -15,8 +16,6 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
-	"github.com/stripe/stripe-go/v72"
-	"github.com/stripe/stripe-go/v72/paymentintent"
 )
 
 var db *sql.DB
@@ -238,10 +237,11 @@ func deleteMenuItem(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]bool{"success": true})
 }
 
-// Create payment intent
-func createPaymentIntent(w http.ResponseWriter, r *http.Request) {
+// Initialize payment with Paystack
+func initializePayment(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Amount float64 `json:"amount"`
+		Email  string  `json:"email"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -249,24 +249,70 @@ func createPaymentIntent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set Stripe API key
-	stripe.Key = os.Getenv("STRIPE_SECRET_KEY")
+	// Paystack expects amount in kobo (smallest currency unit)
+	amountInKobo := int(req.Amount * 100)
 
-	params := &stripe.PaymentIntentParams{
-		Amount:   stripe.Int64(int64(req.Amount * 100)), // Convert to cents
-		Currency: stripe.String(string(stripe.CurrencyUSD)),
+	// Create Paystack payment
+	paystackKey := os.Getenv("PAYSTACK_SECRET_KEY")
+
+	paymentData := map[string]interface{}{
+		"email":  req.Email,
+		"amount": amountInKobo,
 	}
 
-	pi, err := paymentintent.New(params)
+	jsonData, _ := json.Marshal(paymentData)
+
+	client := &http.Client{}
+	paystackReq, err := http.NewRequest("POST", "https://api.paystack.co/transaction/initialize", bytes.NewBuffer(jsonData))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	paystackReq.Header.Set("Authorization", "Bearer "+paystackKey)
+	paystackReq.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(paystackReq)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"clientSecret": pi.ClientSecret,
-	})
+	json.NewEncoder(w).Encode(result)
+}
+
+// Verify Paystack payment
+func verifyPayment(w http.ResponseWriter, r *http.Request) {
+	reference := r.URL.Query().Get("reference")
+
+	paystackKey := os.Getenv("PAYSTACK_SECRET_KEY")
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", "https://api.paystack.co/transaction/verify/"+reference, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	req.Header.Set("Authorization", "Bearer "+paystackKey)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
 }
 
 // Create order
@@ -298,7 +344,10 @@ func createOrder(w http.ResponseWriter, r *http.Request) {
 		"INSERT INTO order_tracking (order_id, status, location, update_message) VALUES ($1, $2, $3, $4)",
 		order.ID, "Order Placed", "Restaurant", "Your order has been received and is being prepared.",
 	)
-
+	if err != nil {
+		http.Error(w, "Failed to create tracking entry: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(order)
 }
@@ -415,7 +464,8 @@ func main() {
 	router.HandleFunc("/api/menu", addMenuItem).Methods("POST")
 	router.HandleFunc("/api/menu/{id}", deleteMenuItem).Methods("DELETE")
 
-	router.HandleFunc("/api/payment/create-intent", createPaymentIntent).Methods("POST")
+	router.HandleFunc("/api/payment/initialize", initializePayment).Methods("POST")
+	router.HandleFunc("/api/payment/verify", verifyPayment).Methods("GET")
 	router.HandleFunc("/api/orders", createOrder).Methods("POST")
 	router.HandleFunc("/api/orders", getAllOrders).Methods("GET")
 	router.HandleFunc("/api/orders/tracking/{tracking_id}", getOrderByTracking).Methods("GET")
