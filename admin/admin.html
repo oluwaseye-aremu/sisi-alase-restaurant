@@ -295,7 +295,6 @@
             <button class="tab" onclick="showTab('tracking')">Order Tracking</button>
         </div>
 
-        <!-- Menu Management Tab -->
         <div id="menu-tab" class="tab-content active">
             <h2>Menu Management</h2>
             <div id="alert-container"></div>
@@ -346,7 +345,6 @@
             <div id="menu-items" class="menu-grid"></div>
         </div>
 
-        <!-- Orders Tab -->
         <div id="orders-tab" class="tab-content">
             <h2>Orders</h2>
             <table class="orders-table">
@@ -365,7 +363,6 @@
             </table>
         </div>
 
-        <!-- Tracking Tab -->
         <div id="tracking-tab" class="tab-content">
             <h2>Update Order Tracking</h2>
             <div class="form-group">
@@ -413,6 +410,23 @@
     <script>
         const API_URL = 'http://localhost:8080/api';
 
+        // --- AUTHENTICATION CHECK ---
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+            window.location.href = 'login.html'; // Redirect to login if no token
+        }
+
+        // Helper to handle Unauthorized (401) responses
+        function handleAuthError(response) {
+            if (response.status === 401) {
+                alert("Session expired. Please login again.");
+                logout();
+                return true;
+            }
+            return false;
+        }
+        // --- END AUTH CHECK ---
+
         // Tab switching
         function showTab(tabName) {
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -454,8 +468,13 @@
             try {
                 const response = await fetch(`${API_URL}/menu`, {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Add Token
+                    },
                     body: formData
                 });
+
+                if (handleAuthError(response)) return;
 
                 if (response.ok) {
                     showAlert('Menu item added successfully!');
@@ -473,6 +492,7 @@
         // Load menu items
         async function loadMenuItems() {
             try {
+                // Technically public, but good to have token if needed in future
                 const response = await fetch(`${API_URL}/menu`);
                 const items = await response.json();
 
@@ -499,8 +519,13 @@
 
             try {
                 const response = await fetch(`${API_URL}/menu/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Add Token
+                    }
                 });
+
+                if (handleAuthError(response)) return;
 
                 if (response.ok) {
                     showAlert('Menu item deleted successfully!');
@@ -514,7 +539,14 @@
         // Load orders
         async function loadOrders() {
             try {
-                const response = await fetch(`${API_URL}/orders`);
+                const response = await fetch(`${API_URL}/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}` // Add Token
+                    }
+                });
+
+                if (handleAuthError(response)) return;
+
                 const orders = await response.json();
 
                 const tbody = document.getElementById('orders-list');
@@ -527,7 +559,7 @@
                         <td><span class="status-badge status-${order.status}">${order.status}</span></td>
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
                         <td>
-                            <button class="btn btn-primary" onclick="viewOrder('${order.tracking_id}')">View</button>
+                            <button class="btn btn-primary" onclick="alert('View details feature to be implemented')">View</button>
                         </td>
                     </tr>
                 `).join('');
@@ -564,9 +596,14 @@
             try {
                 const response = await fetch(`${API_URL}/orders/${orderId}/tracking`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` // Add Token
+                    },
                     body: JSON.stringify({ status, location, update_message: message })
                 });
+
+                if (handleAuthError(response)) return;
 
                 if (response.ok) {
                     showAlert('Tracking updated successfully!');
@@ -581,6 +618,7 @@
         loadMenuItems();
 
         function logout() {
+            localStorage.removeItem('adminToken'); // Clear token
             window.location.href = 'login.html';
         }
     </script>
