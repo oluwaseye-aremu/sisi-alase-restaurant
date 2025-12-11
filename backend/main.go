@@ -547,9 +547,7 @@ func main() {
 	// 1. LOAD THE .ENV FILE FIRST
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Warning: .env file not found or could not be loaded")
-	} else {
-		log.Println(".env file loaded successfully")
+		log.Printf("Error loading .env file: %v", err) // <--- This prints the real reason
 	}
 
 	// 2. ASSIGN JWT KEY (Now that env is loaded)
