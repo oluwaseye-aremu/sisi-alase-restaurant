@@ -11,10 +11,10 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings" // Added for JWT
+	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5" // Added for JWT
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -23,8 +23,9 @@ import (
 
 var db *sql.DB
 
-// --- JWT CONFIGURATION START ---
-var jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+// --- JWT CONFIGURATION ---
+// We declare the variable here, but we assign the value in main()
+var jwtKey []byte
 
 type Credentials struct {
 	Username string `json:"username"`
@@ -35,8 +36,6 @@ type Claims struct {
 	Username string `json:"username"`
 	jwt.RegisteredClaims
 }
-
-// --- JWT CONFIGURATION END ---
 
 // Models
 type MenuItem struct {
@@ -77,7 +76,7 @@ func initDB() {
 	// Neon PostgreSQL connection string
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		log.Fatal("DATABASE_URL environment variable is not set")
+		log.Fatal("DATABASE_URL environment variable is not set. Make sure .env is loaded.")
 	}
 
 	db, err = sql.Open("postgres", connStr)
@@ -86,7 +85,7 @@ func initDB() {
 	}
 
 	if err = db.Ping(); err != nil {
-		log.Fatal(err)
+		log.Fatal("Could not connect to database: ", err)
 	}
 
 	log.Println("Database connected successfully!")
@@ -151,7 +150,7 @@ func adminLogin(w http.ResponseWriter, r *http.Request) {
 	expectedPass := os.Getenv("ADMIN_PASSWORD")
 
 	if expectedUser == "" || expectedPass == "" {
-		http.Error(w, "Server configuration error: Admin credentials not set", http.StatusInternalServerError)
+		http.Error(w, "Server configuration error: Admin credentials not set in .env", http.StatusInternalServerError)
 		return
 	}
 
@@ -431,7 +430,6 @@ func createOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create initial tracking entry
-	// Using trackErr to ensure safe compilation (avoiding "unused variable" warnings)
 	_, trackErr := db.Exec(
 		"INSERT INTO order_tracking (order_id, status, location, update_message) VALUES ($1, $2, $3, $4)",
 		order.ID, "Order Placed", "Restaurant", "Your order has been received and is being prepared.",
@@ -546,14 +544,21 @@ func updateOrderTracking(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Initialize database
-
-	// Load .env file
+	// 1. LOAD THE .ENV FILE FIRST
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Warning: .env file not found, using system environment variables")
+		log.Println("Warning: .env file not found or could not be loaded")
+	} else {
+		log.Println(".env file loaded successfully")
 	}
 
+	// 2. ASSIGN JWT KEY (Now that env is loaded)
+	jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
+	if len(jwtKey) == 0 {
+		log.Println("Warning: JWT_SECRET_KEY is empty!")
+	}
+
+	// 3. INITIALIZE DATABASE
 	initDB()
 
 	router := mux.NewRouter()
@@ -562,7 +567,11 @@ func main() {
 	router.HandleFunc("/api/menu", getMenuItems).Methods("GET")
 	router.HandleFunc("/api/orders", createOrder).Methods("POST")
 	router.HandleFunc("/api/orders/tracking/{tracking_id}", getOrderByTracking).Methods("GET")
-	router.HandleFunc("/api/payment/create-intent", verifyPayment).Methods("POST")
+
+	// Paystack Payment Routes
+	// Note: You had mapped create-intent to verifyPayment, I added both initialize and verify
+	router.HandleFunc("/api/payment/initialize", initializePayment).Methods("POST")
+	router.HandleFunc("/api/payment/verify", verifyPayment).Methods("GET")
 
 	// Login Route (Returns the JWT Token)
 	router.HandleFunc("/api/login", adminLogin).Methods("POST")
