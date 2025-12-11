@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const slideInterval = 5000; // 5 seconds
 
     function nextSlide() {
+        if (!slides.length) return; // Guard clause
         slides[currentSlide].classList.remove('active');
         currentSlide = (currentSlide + 1) % slides.length;
         slides[currentSlide].classList.add('active');
@@ -21,74 +22,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (navToggle) {
         navToggle.addEventListener('click', () => {
             navLinks.classList.toggle('active');
-            // Animate hamburger
-            const hamburger = document.querySelector('.hamburger');
-            // Add animation class if needed, or just rely on CSS transitions
         });
     }
 
     // Scroll Effect for Navbar
     const navbar = document.querySelector('.navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.style.padding = '0.5rem 0';
-            navbar.style.backgroundColor = 'rgba(26, 26, 26, 1)';
-        } else {
-            navbar.style.padding = '1rem 0';
-            navbar.style.backgroundColor = 'rgba(26, 26, 26, 0.95)';
-        }
-    });
-
-    // Modal Functionality
-    const modal = document.getElementById('foodModal');
-    const closeModal = document.querySelector('.close-modal');
-    const foodItems = document.querySelectorAll('.food-item');
-
-    // Elements to update in modal
-    const modalImg = document.getElementById('modalImg');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDesc = document.getElementById('modalDesc');
-    const modalPrice = document.getElementById('modalPrice');
-    const modalIngredients = document.getElementById('modalIngredients');
-    const modalOrderBtn = document.querySelector('.modal-details .btn-primary');
-
-    if (foodItems) {
-        foodItems.forEach(item => {
-            item.addEventListener('click', (e) => {
-                // Prevent triggering the card's button if clicked
-                if (e.target.tagName === 'A' || e.target.closest('a')) return;
-
-                const img = item.dataset.img;
-                const title = item.dataset.title;
-                const desc = item.dataset.desc;
-                const price = item.dataset.price;
-                const ingredients = item.dataset.ingredients;
-
-                if (modalImg) modalImg.src = img;
-                if (modalTitle) modalTitle.textContent = title;
-                if (modalDesc) modalDesc.textContent = desc;
-                if (modalPrice) modalPrice.textContent = price;
-                if (modalIngredients) modalIngredients.textContent = ingredients;
-
-                // Update Order Button
-                if (modalOrderBtn) {
-                    const message = encodeURIComponent(`I would like to order ${title}`);
-                    modalOrderBtn.onclick = () => window.open(`https://wa.me/15551234567?text=${message}`, '_blank');
-                }
-
-                if (modal) {
-                    modal.style.display = 'flex';
-                    // Small timeout to allow display:flex to apply before adding opacity class for transition
-                    setTimeout(() => {
-                        modal.classList.add('show');
-                    }, 10);
-                    document.body.style.overflow = 'hidden'; // Prevent scrolling
-                }
-            });
+    if (navbar) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.style.padding = '0.5rem 0';
+                navbar.style.backgroundColor = 'rgba(26, 26, 26, 1)';
+            } else {
+                navbar.style.padding = '1rem 0';
+                navbar.style.backgroundColor = 'rgba(26, 26, 26, 0.95)';
+            }
         });
     }
 
-    function hideModal() {
+    // --- SHARED MODAL CLOSING LOGIC ---
+    // Note: The opening logic is handled by menu-dynamic.js for the menu page.
+    // script.js handles closing the modal and outside clicks.
+
+    const modal = document.getElementById('foodModal');
+    const closeModal = document.querySelector('.close-modal');
+
+    function hideModalGlobal() {
         if (modal) {
             modal.classList.remove('show');
             setTimeout(() => {
@@ -99,13 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (closeModal) {
-        closeModal.addEventListener('click', hideModal);
+        closeModal.addEventListener('click', hideModalGlobal);
     }
 
     // Close modal when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target === modal) {
-            hideModal();
+            hideModalGlobal();
         }
     });
 
@@ -118,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 target.scrollIntoView({
                     behavior: 'smooth'
                 });
-                // Close mobile menu if open
-                if (navLinks.classList.contains('active')) {
+                if (navLinks && navLinks.classList.contains('active')) {
                     navLinks.classList.remove('active');
                 }
             }

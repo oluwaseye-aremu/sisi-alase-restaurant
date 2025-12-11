@@ -14,7 +14,6 @@
 
 <body>
 
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="ticker-wrap">
             <div class="ticker">
@@ -26,7 +25,6 @@
         </div>
     </div>
 
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
             <a href="index.html" class="logo">Lumière</a>
@@ -50,7 +48,6 @@
         </div>
     </nav>
 
-    <!-- Section 1: Page Header -->
     <header class="page-header section bg-dark text-center" style="padding-top: 8rem; padding-bottom: 4rem;">
         <div class="container">
             <h1 class="text-white">Our Menu</h1>
@@ -58,317 +55,65 @@
         </div>
     </header>
 
-    <!-- Section 2: Starters -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Starters</h2>
-            <div class="grid-3">
-                <!-- Food Item 1 -->
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Crispy Calamari"
-                    data-desc="Tender calamari rings lightly fried, served with lemon aioli and marinara sauce."
-                    data-price="$14" data-ingredients="Squid, Flour, Lemon, Garlic, Egg, Tomato">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Calamari">
-                    </div>
-                    <div class="card-body">
-                        <h3>Crispy Calamari</h3>
-                        <p class="price">$14</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Crispy%20Calamari"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <!-- Food Item 2 -->
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1548943487-a2e4e43b485c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Beef Carpaccio"
-                    data-desc="Thinly sliced raw beef tenderloin with arugula, parmesan shavings, and truffle oil."
-                    data-price="$18" data-ingredients="Beef Tenderloin, Arugula, Parmesan, Truffle Oil, Capers">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1548943487-a2e4e43b485c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Carpaccio">
-                    </div>
-                    <div class="card-body">
-                        <h3>Beef Carpaccio</h3>
-                        <p class="price">$18</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Beef%20Carpaccio"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <!-- Food Item 3 -->
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1606131731446-5568d87113aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Bruschetta Trio"
-                    data-desc="Toasted baguette topped with tomato basil, mushroom truffle, and goat cheese honey."
-                    data-price="$12" data-ingredients="Baguette, Tomato, Basil, Mushroom, Truffle, Goat Cheese, Honey">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1606131731446-5568d87113aa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Bruschetta">
-                    </div>
-                    <div class="card-body">
-                        <h3>Bruschetta Trio</h3>
-                        <p class="price">$12</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Bruschetta%20Trio"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-            </div>
+            <div class="grid-3" id="starters-grid"></div>
         </div>
     </section>
 
-    <!-- Section 3: Main Courses -->
     <section class="section bg-light">
         <div class="container">
             <h2 class="section-title text-center">Main Courses</h2>
-            <div class="grid-3">
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1560684352-8497838a2229?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Wagyu Beef Steak"
-                    data-desc="Premium cut, grilled to perfection with red wine jus, served with roasted vegetables."
-                    data-price="$45" data-ingredients="Wagyu Beef, Red Wine, Butter, Rosemary, Seasonal Vegetables">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1560684352-8497838a2229?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Steak">
-                    </div>
-                    <div class="card-body">
-                        <h3>Wagyu Beef Steak</h3>
-                        <p class="price">$45</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Wagyu%20Beef%20Steak"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1485921325833-c519f76c4927?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Pan-Seared Salmon"
-                    data-desc="Fresh Atlantic salmon with lemon butter sauce and asparagus." data-price="$32"
-                    data-ingredients="Salmon, Lemon, Butter, Asparagus, Dill">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1485921325833-c519f76c4927?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Salmon">
-                    </div>
-                    <div class="card-body">
-                        <h3>Pan-Seared Salmon</h3>
-                        <p class="price">$32</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Pan-Seared%20Salmon"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Truffle Risotto"
-                    data-desc="Creamy arborio rice with black truffle shavings and parmesan." data-price="$28"
-                    data-ingredients="Arborio Rice, Black Truffle, Parmesan, White Wine, Vegetable Stock">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Risotto">
-                    </div>
-                    <div class="card-body">
-                        <h3>Truffle Risotto</h3>
-                        <p class="price">$28</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Truffle%20Risotto"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-            </div>
+            <div class="grid-3" id="main-grid"></div>
         </div>
     </section>
 
-    <!-- Section 4: Chef's Specials -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Chef's Specials</h2>
-            <div class="grid-3">
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Lobster Thermidor"
-                    data-desc="Whole lobster with a rich creamy sauce, gratinated with cheese." data-price="$55"
-                    data-ingredients="Lobster, Cream, Brandy, Mustard, Gruyère Cheese">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1565557623262-b51c2513a641?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Lobster">
-                    </div>
-                    <div class="card-body">
-                        <h3>Lobster Thermidor</h3>
-                        <p class="price">$55</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Lobster%20Thermidor"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1571115177098-24ec42ed204d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Duck Confit"
-                    data-desc="Slow-cooked duck leg with crispy skin, served with potato gratin." data-price="$38"
-                    data-ingredients="Duck Leg, Duck Fat, Potatoes, Garlic, Thyme">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1571115177098-24ec42ed204d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Duck">
-                    </div>
-                    <div class="card-body">
-                        <h3>Duck Confit</h3>
-                        <p class="price">$38</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Duck%20Confit"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-            </div>
+            <div class="grid-3" id="specials-grid"></div>
         </div>
     </section>
 
-    <!-- Section 5: Desserts -->
     <section class="section bg-light">
         <div class="container">
             <h2 class="section-title text-center">Desserts</h2>
-            <div class="grid-3">
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Chocolate Lava Cake"
-                    data-desc="Warm chocolate cake with a molten center, served with vanilla ice cream."
-                    data-price="$12" data-ingredients="Dark Chocolate, Butter, Eggs, Sugar, Flour, Vanilla Ice Cream">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1551024601-bec78aea704b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Cake">
-                    </div>
-                    <div class="card-body">
-                        <h3>Chocolate Lava Cake</h3>
-                        <p class="price">$12</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Chocolate%20Lava%20Cake"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1579372786545-d24232daf58c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Tiramisu"
-                    data-desc="Classic Italian dessert with layers of coffee-soaked ladyfingers and mascarpone cream."
-                    data-price="$10" data-ingredients="Ladyfingers, Espresso, Mascarpone, Eggs, Cocoa Powder">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1579372786545-d24232daf58c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Tiramisu">
-                    </div>
-                    <div class="card-body">
-                        <h3>Tiramisu</h3>
-                        <p class="price">$10</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Tiramisu"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Crème Brûlée"
-                    data-desc="Rich custard base topped with a layer of hardened caramelized sugar." data-price="$11"
-                    data-ingredients="Cream, Egg Yolks, Sugar, Vanilla Bean">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Creme Brulee">
-                    </div>
-                    <div class="card-body">
-                        <h3>Crème Brûlée</h3>
-                        <p class="price">$11</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Crème%20Brûlée"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-            </div>
+            <div class="grid-3" id="desserts-grid"></div>
         </div>
     </section>
 
-    <!-- Section 6: Drinks/Cocktails -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Signature Cocktails</h2>
-            <div class="grid-3">
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Old Fashioned" data-desc="Bourbon, Angostura bitters, sugar cube, orange twist."
-                    data-price="$15" data-ingredients="Bourbon, Bitters, Sugar, Orange">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Cocktail">
-                    </div>
-                    <div class="card-body">
-                        <h3>Old Fashioned</h3>
-                        <p class="price">$15</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Old%20Fashioned"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <!-- More cocktails... -->
-            </div>
+            <div class="grid-3" id="drinks-grid"></div>
         </div>
     </section>
 
-    <!-- Section 7: Wine List -->
     <section class="section bg-light">
         <div class="container text-center">
             <h2 class="section-title">Wine Selection</h2>
-            <p>Ask our sommelier for the perfect pairing.</p>
-            <ul style="margin-top: 2rem; display: inline-block; text-align: left;">
-                <li class="mb-1"><strong>Chardonnay, Napa Valley</strong> - $12/glass</li>
-                <li class="mb-1"><strong>Pinot Noir, Burgundy</strong> - $14/glass</li>
-                <li class="mb-1"><strong>Cabernet Sauvignon, Bordeaux</strong> - $16/glass</li>
-            </ul>
+            <div class="grid-3" id="wine-grid"></div>
         </div>
     </section>
 
-    <!-- Section 8: Kids Menu -->
     <section class="section">
-        <div class="container text-center">
-            <h2 class="section-title">For the Little Ones</h2>
-            <div class="grid-3">
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Mini Burger" data-desc="Juicy mini beef patty with cheese and ketchup." data-price="$10"
-                    data-ingredients="Beef, Cheese, Bun, Ketchup">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Mini Burger">
-                    </div>
-                    <div class="card-body">
-                        <h3>Mini Burger</h3>
-                        <p>$10</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Mini%20Burger"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-                <div class="card food-item"
-                    data-img="https://images.unsplash.com/photo-1543339308-43e59d6b73a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                    data-title="Mac & Cheese" data-desc="Creamy macaroni with cheddar cheese sauce." data-price="$8"
-                    data-ingredients="Macaroni, Cheddar Cheese, Milk, Butter">
-                    <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1543339308-43e59d6b73a6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Mac & Cheese">
-                    </div>
-                    <div class="card-body">
-                        <h3>Mac & Cheese</h3>
-                        <p>$8</p>
-                        <a href="https://wa.me/15551234567?text=I%20would%20like%20to%20order%20Mac%20&%20Cheese"
-                            class="btn btn-primary btn-sm mt-1" target="_blank">Order</a>
-                    </div>
-                </div>
-            </div>
+        <div class="container">
+            <h2 class="section-title text-center">Kid's Menu</h2>
+            <div class="grid-3" id="kids-grid"></div>
         </div>
     </section>
 
-    <!-- Section 9: Dietary Options -->
-    <section class="section bg-light">
+    <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Dietary Options</h2>
             <p class="text-center">We cater to all dietary requirements. Please inform your server.</p>
-            <div class="row mt-2">
-                <div class="col-text text-center">
-                    <i class="fas fa-leaf fa-2x mb-1" style="color: green;"></i>
-                    <h3>Vegan</h3>
-                </div>
-                <div class="col-text text-center">
-                    <i class="fas fa-bread-slice fa-2x mb-1" style="color: orange;"></i>
-                    <h3>Gluten Free</h3>
-                </div>
-            </div>
+            <div class="grid-3" id="kids-grid"></div>
         </div>
     </section>
 
-    <!-- Section 10: Catering -->
+
+
     <section class="section bg-accent text-white">
         <div class="container text-center">
             <h2 class="section-title text-white">Catering Services</h2>
@@ -377,7 +122,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
@@ -409,7 +153,6 @@
         </div>
     </footer>
 
-    <!-- Food Modal -->
     <div id="foodModal" class="modal">
         <div class="modal-content">
             <span class="close-modal">&times;</span>

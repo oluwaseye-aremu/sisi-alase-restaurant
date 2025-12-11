@@ -13,69 +13,55 @@ async function loadMenuItems(category = '') {
         displayMenuItems(items);
     } catch (error) {
         console.error('Error loading menu:', error);
-        showError('Failed to load menu items. Please try again later.');
+        showError('Failed to load menu items. Is the backend running?');
     }
 }
 
 // Display menu items
+// Display menu items
 function displayMenuItems(items) {
-    // Group items by category
+    // 1. Create the buckets for your data
     const categories = {
         starters: [],
         main: [],
         specials: [],
         desserts: [],
-        drinks: []
+        drinks: [],
+        wine: [],    // Added
+        kids: [],    // Added
+        dietary: []  // Added
     };
 
+    // 2. Sort the items into buckets
     items.forEach(item => {
+        // If the category exists in our list, add the item to it
         if (categories[item.category]) {
             categories[item.category].push(item);
         }
     });
 
-    // Update each section
+    // 3. Update the HTML sections
     updateSection('starters', categories.starters);
     updateSection('main', categories.main);
     updateSection('specials', categories.specials);
     updateSection('desserts', categories.desserts);
     updateSection('drinks', categories.drinks);
-}
 
-function updateSection(sectionId, items) {
-    const container = document.getElementById(`${sectionId}-grid`);
-    if (!container) return;
-
-    container.innerHTML = items.map(item => `
-        <div class="card food-item" data-item='${JSON.stringify(item)}'>
-            <div class="card-img">
-                <img src="${API_URL.replace('/api', '')}${item.image_url}" 
-                     alt="${item.title}" 
-                     onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600'">
-            </div>
-            <div class="card-body">
-                <h3>${item.title}</h3>
-                <p class="price">$${item.price.toFixed(2)}</p>
-                <p style="font-size: 0.9rem; color: #666; margin: 0.5rem 0;">${item.description.substring(0, 80)}...</p>
-                <button class="btn btn-primary btn-sm mt-1" onclick="addToCart(${item.id})">
-                    Add to Cart
-                </button>
-                <button class="btn btn-secondary btn-sm mt-1" onclick="viewDetails(${item.id})" style="margin-left: 0.5rem;">
-                    View Details
-                </button>
-            </div>
-        </div>
-    `).join('');
+    // Add these new lines:
+    updateSection('wine', categories.wine);
+    updateSection('kids', categories.kids);
+    updateSection('dietary', categories.dietary);
 }
 
 // Add to cart
 function addToCart(itemId) {
+    // Helper: find item in DOM data attribute
+    // We search across all grids to find the item data
     const itemElement = document.querySelector(`[data-item*='"id":${itemId}']`);
     if (!itemElement) return;
 
     const item = JSON.parse(itemElement.dataset.item);
 
-    // Check if item already in cart
     const existingItem = cart.find(i => i.id === item.id);
 
     if (existingItem) {
@@ -90,10 +76,7 @@ function addToCart(itemId) {
         });
     }
 
-    // Save to localStorage
     localStorage.setItem('cart', JSON.stringify(cart));
-
-    // Update cart UI
     updateCartCount();
     showNotification(`${item.title} added to cart!`);
 }
@@ -105,50 +88,69 @@ function viewDetails(itemId) {
 
     const item = JSON.parse(itemElement.dataset.item);
 
-    // Update modal
     const modal = document.getElementById('foodModal');
-    document.getElementById('modalImg').src = `${API_URL.replace('/api', '')}${item.image_url}`;
-    document.getElementById('modalTitle').textContent = item.title;
-    document.getElementById('modalDesc').textContent = item.description;
-    document.getElementById('modalPrice').textContent = `$${item.price.toFixed(2)}`;
-    document.getElementById('modalIngredients').textContent = item.ingredients || 'Not specified';
+    // Basic null checks
+    if (document.getElementById('modalImg')) document.getElementById('modalImg').src = `${API_URL.replace('/api', '')}${item.image_url}`;
+    if (document.getElementById('modalTitle')) document.getElementById('modalTitle').textContent = item.title;
+    if (document.getElementById('modalDesc')) document.getElementById('modalDesc').textContent = item.description;
+    if (document.getElementById('modalPrice')) document.getElementById('modalPrice').textContent = `$${item.price.toFixed(2)}`;
+    if (document.getElementById('modalIngredients')) document.getElementById('modalIngredients').textContent = item.ingredients || 'Not specified';
 
-    // Update order button
+    // Update order button inside modal to perform Add to Cart
     const orderBtn = document.querySelector('.modal-details .btn-primary');
-    orderBtn.onclick = () => {
-        addToCart(item.id);
-        hideModal();
-    };
+    if (orderBtn) {
+        orderBtn.onclick = () => {
+            addToCart(item.id);
+            // We can assume hideModal is globally available or defined below
+            if (typeof hideModal === 'function') hideModal();
+        };
+    }
 
-    // Show modal
-    modal.style.display = 'flex';
-    setTimeout(() => modal.classList.add('show'), 10);
-    document.body.style.overflow = 'hidden';
+    if (modal) {
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+        document.body.style.overflow = 'hidden';
+    }
 }
 
-// Update cart count badge
+// Global hideModal (matches script.js logic)
+function hideModal() {
+    const modal = document.getElementById('foodModal');
+    if (modal) {
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 300);
+    }
+}
+
 function updateCartCount() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-
     let badge = document.getElementById('cart-count');
+
+    // Auto-create badge if missing
     if (!badge) {
-        // Create cart icon if it doesn't exist
         const navLinks = document.querySelector('.nav-links');
-        const cartItem = document.createElement('li');
-        cartItem.innerHTML = `
-            <a href="cart.html" style="position: relative;">
-                <i class="fas fa-shopping-cart"></i>
-                <span id="cart-count" style="position: absolute; top: -8px; right: -8px; background: #c0392b; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">${totalItems}</span>
-            </a>
-        `;
-        navLinks.appendChild(cartItem);
-    } else {
+        if (navLinks) {
+            const cartItem = document.createElement('li');
+            cartItem.innerHTML = `
+                <a href="cart.html" style="position: relative;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span id="cart-count" style="position: absolute; top: -8px; right: -8px; background: #c0392b; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">${totalItems}</span>
+                </a>
+            `;
+            navLinks.appendChild(cartItem);
+            badge = document.getElementById('cart-count');
+        }
+    }
+
+    if (badge) {
         badge.textContent = totalItems;
         badge.style.display = totalItems > 0 ? 'flex' : 'none';
     }
 }
 
-// Show notification
 function showNotification(message) {
     const notification = document.createElement('div');
     notification.style.cssText = `
@@ -173,7 +175,6 @@ function showNotification(message) {
     }, 2000);
 }
 
-// Show error
 function showError(message) {
     const error = document.createElement('div');
     error.style.cssText = `
@@ -190,54 +191,39 @@ function showError(message) {
     `;
     error.textContent = message;
     document.body.appendChild(error);
-
     setTimeout(() => error.remove(), 3000);
 }
 
-// Hide modal
-function hideModal() {
-    const modal = document.getElementById('foodModal');
-    if (modal) {
-        modal.classList.remove('show');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }, 300);
-    }
-}
-
-// Filter by category
+// Filter logic
 function filterByCategory(category) {
     loadMenuItems(category);
 }
 
-// Initialize
+// Init
 document.addEventListener('DOMContentLoaded', () => {
-    // Create section grids if they don't exist
-    createSectionGrids();
-
-    // Load menu items
-    loadMenuItems();
-
-    // Update cart count
+    // If we are on the menu page, initialize these:
+    if (document.getElementById('starters-grid') || document.querySelector('.grid-3')) {
+        createSectionGrids();
+        loadMenuItems();
+        addCategoryFilters();
+    }
     updateCartCount();
-
-    // Add category filters
-    addCategoryFilters();
 });
 
 function createSectionGrids() {
     const sections = ['starters', 'main', 'specials', 'desserts', 'drinks'];
     sections.forEach(section => {
-        const container = document.querySelector(`.${section} .grid-3, .${section} .menu-grid`);
-        if (container) {
+        // We look for sections that might not have the ID yet
+        // This selector is a bit generic, be careful if you have other grid-3 elements
+        // The safest way is to ensure IDs exist in HTML (which I did in the HTML update above)
+        const container = document.querySelector(`.${section} .grid-3`);
+        if (container && !container.id) {
             container.id = `${section}-grid`;
         }
     });
 }
 
 function addCategoryFilters() {
-    // Add filter buttons to menu page
     const menuHeader = document.querySelector('.page-header');
     if (menuHeader && !document.getElementById('category-filters')) {
         const filterDiv = document.createElement('div');
@@ -255,7 +241,7 @@ function addCategoryFilters() {
     }
 }
 
-// Add CSS animations
+// Animations
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {
