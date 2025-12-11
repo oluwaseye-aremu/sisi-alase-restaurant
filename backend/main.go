@@ -16,6 +16,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5" // Added for JWT
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 )
@@ -546,6 +547,13 @@ func updateOrderTracking(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// Initialize database
+
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Warning: .env file not found, using system environment variables")
+	}
+
 	initDB()
 
 	router := mux.NewRouter()
