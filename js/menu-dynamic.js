@@ -3,11 +3,76 @@ const API_URL = 'http://localhost:8080/api';
 
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-// Load menu items from database
+// --- 1. HELPER FUNCTIONS (Defined First) ---
+
+function updateSection(sectionId, items) {
+    const container = document.getElementById(`${sectionId}-grid`);
+    // If the section doesn't exist in the HTML, just skip it silently
+    if (!container) return;
+
+    if (items.length === 0) {
+        container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #666;">No items available in this category.</p>';
+        return;
+    }
+
+    container.innerHTML = items.map(item => `
+        <div class="card food-item" data-item='${JSON.stringify(item).replace(/'/g, "&#39;")}'>
+            <div class="card-img">
+                <img src="${API_URL.replace('/api', '')}${item.image_url}" 
+                     alt="${item.title}" 
+                     onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600'">
+            </div>
+            <div class="card-body">
+                <h3>${item.title}</h3>
+                <p class="price">$${item.price.toFixed(2)}</p>
+                <p style="font-size: 0.9rem; color: #666; margin: 0.5rem 0;">${item.description ? item.description.substring(0, 80) + '...' : ''}</p>
+                <button class="btn btn-primary btn-sm mt-1" onclick="addToCart(${item.id})">
+                    Add to Cart
+                </button>
+                <button class="btn btn-secondary btn-sm mt-1" onclick="viewDetails(${item.id})" style="margin-left: 0.5rem;">
+                    View Details
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function displayMenuItems(items) {
+    const categories = {
+        starters: [],
+        main: [],
+        specials: [],
+        desserts: [],
+        drinks: [],
+        wine: [],
+        kids: [],
+        dietary: []
+    };
+
+    items.forEach(item => {
+        if (categories[item.category]) {
+            categories[item.category].push(item);
+        }
+    });
+
+    // Update all sections
+    updateSection('starters', categories.starters);
+    updateSection('main', categories.main);
+    updateSection('specials', categories.specials);
+    updateSection('desserts', categories.desserts);
+    updateSection('drinks', categories.drinks);
+    updateSection('wine', categories.wine);
+    updateSection('kids', categories.kids);
+    updateSection('dietary', categories.dietary);
+}
+
+// --- 2. MAIN LOAD LOGIC ---
+
 async function loadMenuItems(category = '') {
     try {
         const url = category ? `${API_URL}/menu?category=${category}` : `${API_URL}/menu`;
         const response = await fetch(url);
+        if (!response.ok) throw new Error('Network response was not ok');
         const items = await response.json();
 
         displayMenuItems(items);
@@ -17,51 +82,13 @@ async function loadMenuItems(category = '') {
     }
 }
 
-// Display menu items
-// Display menu items
-function displayMenuItems(items) {
-    // 1. Create the buckets for your data
-    const categories = {
-        starters: [],
-        main: [],
-        specials: [],
-        desserts: [],
-        drinks: [],
-        wine: [],    // Added
-        kids: [],    // Added
-        dietary: []  // Added
-    };
+// --- 3. CART & UI HELPERS ---
 
-    // 2. Sort the items into buckets
-    items.forEach(item => {
-        // If the category exists in our list, add the item to it
-        if (categories[item.category]) {
-            categories[item.category].push(item);
-        }
-    });
-
-    // 3. Update the HTML sections
-    updateSection('starters', categories.starters);
-    updateSection('main', categories.main);
-    updateSection('specials', categories.specials);
-    updateSection('desserts', categories.desserts);
-    updateSection('drinks', categories.drinks);
-
-    // Add these new lines:
-    updateSection('wine', categories.wine);
-    updateSection('kids', categories.kids);
-    updateSection('dietary', categories.dietary);
-}
-
-// Add to cart
 function addToCart(itemId) {
-    // Helper: find item in DOM data attribute
-    // We search across all grids to find the item data
     const itemElement = document.querySelector(`[data-item*='"id":${itemId}']`);
     if (!itemElement) return;
 
     const item = JSON.parse(itemElement.dataset.item);
-
     const existingItem = cart.find(i => i.id === item.id);
 
     if (existingItem) {
@@ -81,28 +108,35 @@ function addToCart(itemId) {
     showNotification(`${item.title} added to cart!`);
 }
 
-// View details in modal
 function viewDetails(itemId) {
     const itemElement = document.querySelector(`[data-item*='"id":${itemId}']`);
     if (!itemElement) return;
 
     const item = JSON.parse(itemElement.dataset.item);
-
     const modal = document.getElementById('foodModal');
-    // Basic null checks
+
+    // Safety checks for modal elements
     if (document.getElementById('modalImg')) document.getElementById('modalImg').src = `${API_URL.replace('/api', '')}${item.image_url}`;
     if (document.getElementById('modalTitle')) document.getElementById('modalTitle').textContent = item.title;
     if (document.getElementById('modalDesc')) document.getElementById('modalDesc').textContent = item.description;
     if (document.getElementById('modalPrice')) document.getElementById('modalPrice').textContent = `$${item.price.toFixed(2)}`;
     if (document.getElementById('modalIngredients')) document.getElementById('modalIngredients').textContent = item.ingredients || 'Not specified';
 
-    // Update order button inside modal to perform Add to Cart
+    // Update button inside modal
     const orderBtn = document.querySelector('.modal-details .btn-primary');
     if (orderBtn) {
         orderBtn.onclick = () => {
             addToCart(item.id);
-            // We can assume hideModal is globally available or defined below
-            if (typeof hideModal === 'function') hideModal();
+            // Hide modal logic
+            if (typeof hideModal === 'function') {
+                hideModal();
+            } else {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }, 300);
+            }
         };
     }
 
@@ -129,7 +163,6 @@ function updateCartCount() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
     let badge = document.getElementById('cart-count');
 
-    // Auto-create badge if missing
     if (!badge) {
         const navLinks = document.querySelector('.nav-links');
         if (navLinks) {
@@ -194,31 +227,18 @@ function showError(message) {
     setTimeout(() => error.remove(), 3000);
 }
 
-// Filter logic
 function filterByCategory(category) {
     loadMenuItems(category);
 }
 
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-    // If we are on the menu page, initialize these:
-    if (document.getElementById('starters-grid') || document.querySelector('.grid-3')) {
-        createSectionGrids();
-        loadMenuItems();
-        addCategoryFilters();
-    }
-    updateCartCount();
-});
-
 function createSectionGrids() {
-    const sections = ['starters', 'main', 'specials', 'desserts', 'drinks'];
+    const sections = ['starters', 'main', 'specials', 'desserts', 'drinks', 'wine', 'kids', 'dietary'];
     sections.forEach(section => {
-        // We look for sections that might not have the ID yet
-        // This selector is a bit generic, be careful if you have other grid-3 elements
-        // The safest way is to ensure IDs exist in HTML (which I did in the HTML update above)
-        const container = document.querySelector(`.${section} .grid-3`);
-        if (container && !container.id) {
-            container.id = `${section}-grid`;
+        if (!document.getElementById(`${section}-grid`)) {
+            const container = document.querySelector(`.${section} .grid-3`);
+            if (container) {
+                container.id = `${section}-grid`;
+            }
         }
     });
 }
@@ -236,10 +256,24 @@ function addCategoryFilters() {
             <button class="btn btn-sm btn-outline" onclick="filterByCategory('specials')">Specials</button>
             <button class="btn btn-sm btn-outline" onclick="filterByCategory('desserts')">Desserts</button>
             <button class="btn btn-sm btn-outline" onclick="filterByCategory('drinks')">Drinks</button>
+            <button class="btn btn-sm btn-outline" onclick="filterByCategory('wine')">Wine</button>
+            <button class="btn btn-sm btn-outline" onclick="filterByCategory('kids')">Kids</button>
         `;
         menuHeader.appendChild(filterDiv);
     }
 }
+
+// --- 4. INITIALIZATION ---
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if we are on a page that needs menu items
+    if (document.getElementById('starters-grid') || document.querySelector('.grid-3')) {
+        createSectionGrids();
+        loadMenuItems();
+        addCategoryFilters();
+    }
+    updateCartCount();
+});
 
 // Animations
 const style = document.createElement('style');
