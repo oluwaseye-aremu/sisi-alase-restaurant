@@ -24,7 +24,7 @@ function updateSection(sectionId, items) {
             </div>
             <div class="card-body">
                 <h3>${item.title}</h3>
-                <p class="price">$${item.price.toFixed(2)}</p>
+                <p class="price">₦${item.price.toLocaleString()}</p>
                 <p style="font-size: 0.9rem; color: #666; margin: 0.5rem 0;">${item.description ? item.description.substring(0, 80) + '...' : ''}</p>
                 <button class="btn btn-primary btn-sm mt-1" onclick="addToCart(${item.id})">
                     Add to Cart

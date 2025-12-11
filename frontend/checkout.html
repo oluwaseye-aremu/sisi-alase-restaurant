@@ -161,83 +161,90 @@
 
 <body>
     <div class="header">
-        <h1>🍽️ Checkout</h1>
+        <h1>Checkout</h1>
     </div>
 
     <div class="container">
-        <div id="checkout-section" class="checkout-grid">
-            <!-- Customer Information -->
-            <div class="section">
-                <h2>Customer Information</h2>
-                <div id="error-message" class="error-message"></div>
+        <div id="error-message" class="error-message"></div>
 
-                <form id="checkout-form">
-                    <div class="form-group">
-                        <label>Full Name *</label>
-                        <input type="text" id="customer-name" required>
+        <div id="checkout-view">
+            <div class="checkout-grid">
+                <div class="section">
+                    <h2>Customer Information</h2>
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" id="phone" required>
+                        </div>
+                        <button type="submit" class="btn" id="pay-btn">Pay with Paystack (Naira)</button>
+                    </form>
+                </div>
+
+                <div class="section">
+                    <h2>Order Summary</h2>
+                    <div id="cart-items-summary"></div>
+                    <div class="total">
+                        <span>Total:</span>
+                        <span id="total-amount">₦0.00</span>
                     </div>
-
-                    <div class="form-group">
-                        <label>Email *</label>
-                        <input type="email" id="customer-email" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Phone Number *</label>
-                        <input type="tel" id="customer-phone" required placeholder="+234 800 000 0000">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Delivery Address *</label>
-                        <input type="text" id="customer-address" required>
-                    </div>
-
-                    <button type="submit" class="btn" id="submit-button">
-                        <span id="button-text">Pay with Paystack</span>
-                        <span id="spinner" style="display: none;">Processing...</span>
-                    </button>
-                </form>
-            </div>
-
-            <!-- Order Summary -->
-            <div class="section">
-                <h2>Order Summary</h2>
-                <div id="cart-items"></div>
-                <div class="total">
-                    <span>Total:</span>
-                    <span id="total-amount">₦0.00</span>
                 </div>
             </div>
         </div>
 
-        <!-- Success Message (Hidden by default) -->
-        <div id="success-section" class="section" style="display: none;">
-            <div class="success-message">
-                <h2>✅ Order Placed Successfully!</h2>
-                <p>Thank you for your order. Your payment has been processed.</p>
-                <div class="tracking-id">
-                    Tracking ID: <span id="tracking-id-display"></span>
-                </div>
-                <p>You can track your order using this tracking ID.</p>
-                <a href="/frontend/tracking.html" class="btn"
-                    style="display: inline-block; text-decoration: none; margin-top: 1rem; width: auto; padding: 1rem 2rem;">Track
-                    Order</a>
-                <a href="/frontend/menu.html" class="btn"
-                    style="display: inline-block; text-decoration: none; margin-top: 1rem; width: auto; padding: 1rem 2rem; margin-left: 1rem; background: #1a1a1a; color: #d4af37;">Back
-                    to Menu</a>
+        <div id="success-view" style="display: none;">
+            <div class="section success-message">
+                <h2>✅ Payment Successful!</h2>
+                <p>Your order has been placed.</p>
+                <p style="margin: 1rem 0; font-size: 1.2rem;">Tracking ID: <strong id="tracking-id"></strong></p>
+                <a href="menu.html" class="btn"
+                    style="display: inline-block; width: auto; padding: 0.8rem 2rem; text-decoration: none;">Return to
+                    Menu</a>
             </div>
         </div>
+    </div>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <h3 id="loading-text">Processing...</h3>
     </div>
 
     <script>
         const API_URL = 'http://localhost:8080/api';
-        const PAYSTACK_PUBLIC_KEY = 'pk_test_YOUR_KEY_HERE'; // Replace with your Paystack public key
-
-        // Load cart from localStorage
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-        function displayCart() {
-            const container = document.getElementById('cart-items');
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reference = urlParams.get('reference');
+
+            if (reference) {
+                verifyTransaction(reference);
+            } else {
+                loadCart();
+                const savedData = JSON.parse(sessionStorage.getItem('checkout_data'));
+                if (savedData) {
+                    document.getElementById('name').value = savedData.name || '';
+                    document.getElementById('email').value = savedData.email || '';
+                    document.getElementById('phone').value = savedData.phone || '';
+                }
+            }
+        });
+
+        function loadCart() {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                window.location.href = 'menu.html';
+                return;
+            }
+
+            const container = document.getElementById('cart-items-summary');
             let total = 0;
 
             container.innerHTML = cart.map(item => {
@@ -245,118 +252,129 @@
                 return `
                     <div class="cart-item">
                         <div class="item-details">
-                            <h3>${item.title}</h3>
-                            <p>Quantity: ${item.quantity}</p>
+                            <h3>${item.title} x ${item.quantity}</h3>
                         </div>
-                        <div class="item-price">₦${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="item-price">₦${(item.price * item.quantity).toLocaleString()}</div>
                     </div>
                 `;
             }).join('');
 
-            document.getElementById('total-amount').textContent = `₦${total.toFixed(2)}`;
-            return total;
+            // DELIVERY FEE LOGIC (Adjusted for Naira)
+            // Example: 1500 Naira delivery fee
+            const delivery = 1500;
+            const finalTotal = total + delivery;
+
+            // Display with Commas (e.g., ₦5,000)
+            document.getElementById('total-amount').textContent = `₦${finalTotal.toLocaleString()}`;
+
+            sessionStorage.setItem('order_total', finalTotal);
         }
 
-        // Handle form submission
         document.getElementById('checkout-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const submitButton = document.getElementById('submit-button');
-            const buttonText = document.getElementById('button-text');
-            const spinner = document.getElementById('spinner');
-            const errorMessage = document.getElementById('error-message');
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const amount = parseFloat(sessionStorage.getItem('order_total'));
 
-            submitButton.disabled = true;
-            buttonText.style.display = 'none';
-            spinner.style.display = 'inline';
-            errorMessage.style.display = 'none';
-
-            const customerName = document.getElementById('customer-name').value;
-            const customerEmail = document.getElementById('customer-email').value;
-            const customerPhone = document.getElementById('customer-phone').value;
-            const customerAddress = document.getElementById('customer-address').value;
-            const totalAmount = displayCart();
+            sessionStorage.setItem('checkout_data', JSON.stringify({ name, email, phone }));
+            showLoading('Initializing Payment...');
 
             try {
-                // Initialize Paystack payment
-                const handler = PaystackPop.setup({
-                    key: PAYSTACK_PUBLIC_KEY,
-                    email: customerEmail,
-                    amount: totalAmount * 100, // Paystack expects amount in kobo (multiply by 100)
-                    currency: 'NGN',
-                    ref: 'ORD-' + Math.floor((Math.random() * 1000000000) + 1),
-                    metadata: {
-                        custom_fields: [
-                            {
-                                display_name: "Customer Name",
-                                variable_name: "customer_name",
-                                value: customerName
-                            },
-                            {
-                                display_name: "Phone Number",
-                                variable_name: "phone_number",
-                                value: customerPhone
-                            }
-                        ]
-                    },
-                    callback: async function (response) {
-                        // Payment successful
-                        console.log('Payment successful:', response);
-
-                        // Create order
-                        const orderResponse = await fetch(`${API_URL}/orders`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                customer_name: customerName,
-                                customer_email: customerEmail,
-                                customer_phone: customerPhone,
-                                items: JSON.stringify(cart),
-                                total_amount: totalAmount,
-                                payment_status: 'paid',
-                                payment_reference: response.reference
-                            })
-                        });
-
-                        const order = await orderResponse.json();
-
-                        // Show success message
-                        document.getElementById('checkout-section').style.display = 'none';
-                        document.getElementById('success-section').style.display = 'block';
-                        document.getElementById('tracking-id-display').textContent = order.tracking_id;
-
-                        // Clear cart
-                        localStorage.removeItem('cart');
-                    },
-                    onClose: function () {
-                        // Payment closed/cancelled
-                        submitButton.disabled = false;
-                        buttonText.style.display = 'inline';
-                        spinner.style.display = 'none';
-                        errorMessage.textContent = 'Payment was cancelled. Please try again.';
-                        errorMessage.style.display = 'block';
-                    }
+                const response = await fetch(`${API_URL}/payment/initialize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, amount: amount })
                 });
 
-                handler.openIframe();
+                const data = await response.json();
 
+                if (data.status && data.data.authorization_url) {
+                    window.location.href = data.data.authorization_url;
+                } else {
+                    throw new Error('Failed to initialize payment');
+                }
             } catch (error) {
-                console.error('Error:', error);
-                errorMessage.textContent = 'An error occurred. Please try again.';
-                errorMessage.style.display = 'block';
-                submitButton.disabled = false;
-                buttonText.style.display = 'inline';
-                spinner.style.display = 'none';
+                console.error(error);
+                showError('Payment initialization failed. Please try again.');
+                hideLoading();
             }
         });
 
-        // Initial display
-        displayCart();
+        async function verifyTransaction(reference) {
+            showLoading('Verifying Payment...');
+            document.getElementById('checkout-view').style.display = 'none';
 
-        // Redirect if cart is empty
-        if (cart.length === 0) {
-            alert('Your cart is empty!');
-            window.location.href = 'menu.html';
+            try {
+                const verifyResp = await fetch(`${API_URL}/payment/verify?reference=${reference}`);
+                const verifyData = await verifyResp.json();
+
+                if (verifyData.status && verifyData.data.status === 'success') {
+                    await createOrder();
+                } else {
+                    throw new Error('Payment verification failed');
+                }
+            } catch (error) {
+                console.error(error);
+                showError('Payment failed or could not be verified.');
+                hideLoading();
+                document.getElementById('checkout-view').style.display = 'block';
+            }
+        }
+
+        async function createOrder() {
+            showLoading('Creating Order...');
+            const customerData = JSON.parse(sessionStorage.getItem('checkout_data'));
+            const amount = parseFloat(sessionStorage.getItem('order_total'));
+
+            const orderData = {
+                customer_name: customerData.name,
+                customer_email: customerData.email,
+                customer_phone: customerData.phone,
+                items: JSON.stringify(cart),
+                total_amount: amount,
+                payment_status: 'paid'
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(orderData)
+                });
+
+                if (response.ok) {
+                    const order = await response.json();
+                    document.getElementById('tracking-id').textContent = order.tracking_id;
+                    document.getElementById('success-view').style.display = 'block';
+                    localStorage.removeItem('cart');
+                    sessionStorage.removeItem('checkout_data');
+                    sessionStorage.removeItem('order_total');
+                    hideLoading();
+                } else {
+                    throw new Error('Failed to create order');
+                }
+            } catch (error) {
+                showError('Payment successful, but order creation failed. Please contact support.');
+                hideLoading();
+            }
+        }
+
+        function showLoading(text) {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-message');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 5000);
         }
     </script>
 </body>
