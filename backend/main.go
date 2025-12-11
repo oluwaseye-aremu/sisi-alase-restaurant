@@ -73,7 +73,7 @@ type OrderTracking struct {
 // Initialize database
 func initDB() {
 	var err error
-	// Replace with your Neon PostgreSQL connection string
+	// Neon PostgreSQL connection string
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
 		log.Fatal("DATABASE_URL environment variable is not set")
