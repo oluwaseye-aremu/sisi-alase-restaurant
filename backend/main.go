@@ -662,7 +662,8 @@ func main() {
 
 	// Serve uploaded images
 	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
-
+	// Serve Admin Files
+	router.PathPrefix("/admin/").Handler(http.StripPrefix("/admin/", http.FileServer(http.Dir("../admin"))))
 	// Serve Frontend files (Important for Ngrok/Production)
 	// Assumes "frontend" folder is a sibling to "backend"
 	// If you are NOT using ngrok with the backend-serving-frontend setup, you can remove this line.
