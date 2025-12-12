@@ -204,56 +204,62 @@
                 <h2>✅ Payment Successful!</h2>
                 <p>Your order has been placed.</p>
                 <p style="margin: 1rem 0; font-size: 1.2rem;">Tracking ID: <strong id="tracking-id"></strong></p>
-                <a href="menu.html" class="btn"
-                    style="display: inline-block; width: auto; padding: 0.8rem 2rem; text-decoration: none;">Return to
-                    Menu</a>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Please save this ID to track your
+                    order.</p>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <a href="menu.html" class="btn btn-outline"
+                        style="border: 2px solid #d4af37; color: #1a1a1a; background: transparent; padding: 0.8rem 2rem; text-decoration: none;">Return
+                        to Menu</a>
+
+                    <button id="track-btn" class="btn" style="width: auto; padding: 0.8rem 2rem;">Track Order</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="loading-overlay">
-        <div class="spinner"></div>
-        <h3 id="loading-text">Processing...</h3>
-    </div>
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <h3 id="loading-text">Processing...</h3>
+        </div>
 
-    <script>
-        const API_URL = 'http://localhost:8080/api';
-        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        <script>
+            const API_URL = 'http://localhost:8080/api';
+            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-        // 1. INITIALIZATION
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const reference = urlParams.get('reference');
+            // 1. INITIALIZATION
+            window.addEventListener('DOMContentLoaded', () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const reference = urlParams.get('reference');
 
-            if (reference) {
-                // We are coming back from Paystack
-                verifyTransaction(reference);
-            } else {
-                // We are starting a new checkout
-                loadCart();
-                const savedData = JSON.parse(sessionStorage.getItem('checkout_data'));
-                if (savedData) {
-                    document.getElementById('name').value = savedData.name || '';
-                    document.getElementById('email').value = savedData.email || '';
-                    document.getElementById('phone').value = savedData.phone || '';
+                if (reference) {
+                    // We are coming back from Paystack
+                    verifyTransaction(reference);
+                } else {
+                    // We are starting a new checkout
+                    loadCart();
+                    const savedData = JSON.parse(sessionStorage.getItem('checkout_data'));
+                    if (savedData) {
+                        document.getElementById('name').value = savedData.name || '';
+                        document.getElementById('email').value = savedData.email || '';
+                        document.getElementById('phone').value = savedData.phone || '';
+                    }
                 }
-            }
-        });
+            });
 
-        // 2. LOAD CART UI
-        function loadCart() {
-            if (cart.length === 0) {
-                alert("Your cart is empty!");
-                window.location.href = 'menu.html';
-                return;
-            }
+            // 2. LOAD CART UI
+            function loadCart() {
+                if (cart.length === 0) {
+                    alert("Your cart is empty!");
+                    window.location.href = 'menu.html';
+                    return;
+                }
 
-            const container = document.getElementById('cart-items-summary');
-            let total = 0;
+                const container = document.getElementById('cart-items-summary');
+                let total = 0;
 
-            container.innerHTML = cart.map(item => {
-                total += item.price * item.quantity;
-                return `
+                container.innerHTML = cart.map(item => {
+                    total += item.price * item.quantity;
+                    return `
                     <div class="cart-item">
                         <div class="item-details">
                             <h3>${item.title} x ${item.quantity}</h3>
@@ -261,151 +267,142 @@
                         <div class="item-price">₦${(item.price * item.quantity).toLocaleString()}</div>
                     </div>
                 `;
-            }).join('');
+                }).join('');
 
-            // Fixed Delivery Fee in Naira (1500)
-            const delivery = 1500;
-            const finalTotal = total + delivery;
+                // Fixed Delivery Fee in Naira (1500)
+                const delivery = 1500;
+                const finalTotal = total + delivery;
 
-            document.getElementById('total-amount').textContent = `₦${finalTotal.toLocaleString()}`;
-            sessionStorage.setItem('order_total', finalTotal);
-        }
-
-        // 3. HANDLE PAYMENT SUBMISSION
-        document.getElementById('checkout-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const amount = parseFloat(sessionStorage.getItem('order_total'));
-
-            // Store data for when we return
-            sessionStorage.setItem('checkout_data', JSON.stringify({ name, email, phone }));
-
-            showLoading('Initializing Payment...');
-
-            try {
-                // Initialize Payment
-                const response = await fetch(`${API_URL}/payment/initialize`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, amount: amount })
-                });
-
-                const data = await response.json();
-
-                if (data.status && data.data && data.data.authorization_url) {
-                    window.location.href = data.data.authorization_url;
-                } else {
-                    console.error("Init Error:", data);
-                    throw new Error(data.message || 'Failed to initialize payment');
-                }
-            } catch (error) {
-                console.error(error);
-                showError(`Error: ${error.message}`);
-                hideLoading();
-            }
-        });
-
-        // 4. VERIFY TRANSACTION
-        async function verifyTransaction(reference) {
-            showLoading('Verifying Payment...');
-            document.getElementById('checkout-view').style.display = 'none';
-
-            try {
-                // Call Backend Verification
-                const verifyResp = await fetch(`${API_URL}/payment/verify?reference=${reference}`);
-
-                if (!verifyResp.ok) {
-                    throw new Error(`Server returned ${verifyResp.status}`);
-                }
-
-                const verifyData = await verifyResp.json();
-                console.log("Verification Response:", verifyData); // Check console for this if it fails
-
-                // Safe check: ensure 'data' exists before checking 'status'
-                if (verifyData.status && verifyData.data && verifyData.data.status === 'success') {
-                    await createOrder();
-                } else {
-                    const msg = verifyData.message || 'Payment verification failed at Paystack';
-                    throw new Error(msg);
-                }
-            } catch (error) {
-                console.error("Verification Error:", error);
-                showError(`Payment Failed: ${error.message}`);
-                hideLoading();
-                document.getElementById('checkout-view').style.display = 'block';
-            }
-        }
-
-        // 5. CREATE ORDER
-        async function createOrder() {
-            showLoading('Creating Order...');
-
-            // Retrieve stored data
-            const customerData = JSON.parse(sessionStorage.getItem('checkout_data'));
-            const amount = parseFloat(sessionStorage.getItem('order_total'));
-
-            // Safety check: Did we lose the session data?
-            if (!customerData) {
-                throw new Error("Session expired. Please fill in your details again.");
+                document.getElementById('total-amount').textContent = `₦${finalTotal.toLocaleString()}`;
+                sessionStorage.setItem('order_total', finalTotal);
             }
 
-            const orderData = {
-                customer_name: customerData.name,
-                customer_email: customerData.email,
-                customer_phone: customerData.phone,
-                items: JSON.stringify(cart),
-                total_amount: amount,
-                payment_status: 'paid'
-            };
+            // 3. HANDLE PAYMENT SUBMISSION
+            document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-            try {
-                const response = await fetch(`${API_URL}/orders`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                });
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const amount = parseFloat(sessionStorage.getItem('order_total'));
 
-                if (response.ok) {
-                    const order = await response.json();
+                // Store data for when we return
+                sessionStorage.setItem('checkout_data', JSON.stringify({ name, email, phone }));
 
-                    document.getElementById('tracking-id').textContent = order.tracking_id;
-                    document.getElementById('success-view').style.display = 'block';
+                showLoading('Initializing Payment...');
 
-                    // Cleanup
-                    localStorage.removeItem('cart');
-                    sessionStorage.removeItem('checkout_data');
-                    sessionStorage.removeItem('order_total');
+                try {
+                    // Initialize Payment
+                    const response = await fetch(`${API_URL}/payment/initialize`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, amount: amount })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.status && data.data && data.data.authorization_url) {
+                        window.location.href = data.data.authorization_url;
+                    } else {
+                        console.error("Init Error:", data);
+                        throw new Error(data.message || 'Failed to initialize payment');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showError(`Error: ${error.message}`);
                     hideLoading();
-                } else {
-                    const errText = await response.text();
-                    throw new Error('Order creation failed: ' + errText);
                 }
-            } catch (error) {
-                console.error("Order Error:", error);
-                showError(error.message);
-                hideLoading();
-                document.getElementById('checkout-view').style.display = 'block';
+            });
+
+            // 4. VERIFY TRANSACTION
+            async function verifyTransaction(reference) {
+                showLoading('Verifying Payment...');
+                document.getElementById('checkout-view').style.display = 'none';
+
+                try {
+                    // Call Backend Verification
+                    const verifyResp = await fetch(`${API_URL}/payment/verify?reference=${reference}`);
+
+                    if (!verifyResp.ok) {
+                        throw new Error(`Server returned ${verifyResp.status}`);
+                    }
+
+                    const verifyData = await verifyResp.json();
+                    console.log("Verification Response:", verifyData); // Check console for this if it fails
+
+                    // Safe check: ensure 'data' exists before checking 'status'
+                    if (verifyData.status && verifyData.data && verifyData.data.status === 'success') {
+                        await createOrder();
+                    } else {
+                        const msg = verifyData.message || 'Payment verification failed at Paystack';
+                        throw new Error(msg);
+                    }
+                } catch (error) {
+                    console.error("Verification Error:", error);
+                    showError(`Payment Failed: ${error.message}`);
+                    hideLoading();
+                    document.getElementById('checkout-view').style.display = 'block';
+                }
             }
-        }
 
-        function showLoading(text) {
-            document.getElementById('loading-text').textContent = text;
-            document.getElementById('loading-overlay').style.display = 'flex';
-        }
+            // 5. CREATE ORDER
+            async function createOrder() {
+                showLoading('Creating Order...');
 
-        function hideLoading() {
-            document.getElementById('loading-overlay').style.display = 'none';
-        }
+                const customerData = JSON.parse(sessionStorage.getItem('checkout_data'));
+                const amount = parseFloat(sessionStorage.getItem('order_total'));
 
-        function showError(msg) {
-            const el = document.getElementById('error-message');
-            el.textContent = msg;
-            el.style.display = 'block';
-        }
-    </script>
+                if (!customerData) {
+                    throw new Error("Session expired. Please fill in your details again.");
+                }
+
+                const orderData = {
+                    customer_name: customerData.name,
+                    customer_email: customerData.email,
+                    customer_phone: customerData.phone,
+                    items: JSON.stringify(cart),
+                    total_amount: amount,
+                    payment_status: 'paid'
+                };
+
+                try {
+                    const response = await fetch(`${API_URL}/orders`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(orderData)
+                    });
+
+                    if (response.ok) {
+                        const order = await response.json();
+
+                        // Display Tracking ID
+                        document.getElementById('tracking-id').textContent = order.tracking_id;
+
+                        // --- NEW: SETUP TRACK BUTTON ---
+                        // When clicked, go to track.html AND auto-fill the search box using the URL
+                        document.getElementById('track-btn').onclick = function () {
+                            window.location.href = `track.html?id=${order.tracking_id}`;
+                        };
+
+                        document.getElementById('success-view').style.display = 'block';
+
+                        // Cleanup
+                        localStorage.removeItem('cart');
+                        sessionStorage.removeItem('checkout_data');
+                        sessionStorage.removeItem('order_total');
+                        hideLoading();
+                    } else {
+                        const errText = await response.text();
+                        throw new Error('Order creation failed: ' + errText);
+                    }
+                } catch (error) {
+                    console.error("Order Error:", error);
+                    showError(error.message);
+                    hideLoading();
+                    document.getElementById('checkout-view').style.display = 'block';
+                }
+            }
+        </script>
 </body>
 
 </html>

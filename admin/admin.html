@@ -5,7 +5,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Lumière</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
     <style>
+        :root {
+            --primary: #d4af37;
+            --dark: #1a1a1a;
+            --light: #f4f7f6;
+            --danger: #e74c3c;
+            --success: #2ecc71;
+            --sidebar-width: 260px;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,62 +28,210 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Lato', sans-serif;
+            background: var(--light);
+            display: flex;
+            min-height: 100vh;
         }
 
-        .header {
-            background: #1a1a1a;
-            color: #d4af37;
-            padding: 1.5rem 2rem;
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark);
+            color: #fff;
+            position: fixed;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 0;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .brand h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            list-style: none;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            color: #aaa;
+            font-size: 1.1rem;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item i {
+            margin-right: 1rem;
+            width: 25px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(212, 175, 55, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .logout-btn {
+            margin: 2rem;
+            padding: 1rem;
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* --- MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem 3rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .header h1 {
-            font-size: 1.8rem;
+        .page-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--dark);
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+        /* --- DASHBOARD STATS --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
         }
 
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #ddd;
+        .stat-card {
+            padding: 2rem;
+            border-radius: 12px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
         }
 
-        .tab {
-            padding: 1rem 2rem;
-            background: none;
-            border: none;
-            cursor: pointer;
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Colorful Gradients */
+        .card-revenue {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+        }
+
+        .card-orders {
+            background: linear-gradient(135deg, #3a7bd5, #00d2ff);
+        }
+
+        .card-pending {
+            background: linear-gradient(135deg, #ff9966, #ff5e62);
+        }
+
+        .stat-card h3 {
             font-size: 1rem;
-            color: #666;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
         }
 
-        .tab.active {
-            color: #d4af37;
-            border-bottom-color: #d4af37;
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
         }
 
-        .tab-content {
-            display: none;
+        .stat-card i {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            opacity: 0.2;
+        }
+
+        /* --- CHARTS --- */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-wrapper {
             background: white;
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-wrapper h3 {
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+        }
+
+        /* --- TABS CONTENT --- */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
         }
 
         .tab-content.active {
             display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- FORMS --- */
+        .admin-form {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
         }
 
         .form-group {
@@ -79,121 +242,133 @@
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
-            color: #333;
+            color: var(--dark);
         }
 
         .form-group input,
-        .form-group textarea,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 0.8rem;
+            padding: 1rem;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 8px;
             font-size: 1rem;
+            transition: 0.3s;
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
         }
 
         .btn {
-            padding: 0.8rem 2rem;
+            padding: 1rem 2rem;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
             font-weight: 600;
-            transition: all 0.3s;
+            font-size: 1rem;
+            transition: 0.3s;
         }
 
         .btn-primary {
-            background: #d4af37;
-            color: #1a1a1a;
+            background: var(--primary);
+            color: var(--dark);
         }
 
         .btn-primary:hover {
-            background: #c0a030;
+            background: #b3922d;
         }
 
         .btn-danger {
-            background: #c0392b;
+            background: var(--danger);
             color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
         }
 
-        .btn-danger:hover {
-            background: #a93226;
-        }
-
+        /* --- MENU GRID --- */
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
+            gap: 2rem;
             margin-top: 2rem;
         }
 
         .menu-card {
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
-            transition: transform 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: 0.3s;
         }
 
         .menu-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .menu-card img {
             width: 100%;
-            height: 200px;
+            height: 180px;
             object-fit: cover;
         }
 
         .menu-card-body {
-            padding: 1rem;
+            padding: 1.5rem;
         }
 
         .menu-card h3 {
+            font-family: 'Playfair Display', serif;
             margin-bottom: 0.5rem;
-            color: #333;
+            font-size: 1.2rem;
         }
 
-        .menu-card .price {
-            color: #d4af37;
-            font-size: 1.2rem;
+        .menu-price {
+            color: var(--primary);
             font-weight: bold;
-            margin: 0.5rem 0;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        /* --- ORDERS TABLE --- */
+        .table-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
         }
 
         .orders-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 1rem;
         }
 
         .orders-table th,
         .orders-table td {
-            padding: 1rem;
+            padding: 1.2rem;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #eee;
         }
 
         .orders-table th {
             background: #f9f9f9;
-            font-weight: 600;
+            color: var(--dark);
+            font-weight: 700;
         }
 
         .orders-table tr:hover {
-            background: #f5f5f5;
+            background: #fafafa;
         }
 
         .status-badge {
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 600;
+            text-transform: capitalize;
         }
 
         .status-pending {
@@ -201,7 +376,7 @@
             color: #856404;
         }
 
-        .status-preparing {
+        .status-confirmed {
             background: #cfe2ff;
             color: #084298;
         }
@@ -216,56 +391,13 @@
             color: #0f5132;
         }
 
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .close-modal {
-            font-size: 2rem;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .image-preview {
-            max-width: 200px;
-            margin-top: 1rem;
-            border-radius: 8px;
-        }
-
+        /* Alerts */
         .alert {
             padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
         }
 
         .alert-success {
@@ -279,55 +411,173 @@
             color: #842029;
             border: 1px solid #f5c2c7;
         }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 1rem;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                overflow-x: auto;
+            }
+
+            .brand {
+                margin-bottom: 0;
+                margin-right: 2rem;
+            }
+
+            .brand h2 {
+                font-size: 1.5rem;
+            }
+
+            .nav-links {
+                display: flex;
+                flex-direction: row;
+            }
+
+            .nav-item {
+                padding: 0.5rem 1rem;
+                border-left: none;
+                border-bottom: 4px solid transparent;
+            }
+
+            .nav-item.active {
+                border-bottom-color: var(--primary);
+                background: none;
+            }
+
+            .nav-item span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            .logout-btn {
+                display: none;
+            }
+
+            /* Hide logout on mobile header for space */
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>🍽️ Lumière Admin Dashboard</h1>
-        <button class="btn btn-danger" onclick="logout()">Logout</button>
-    </div>
 
-    <div class="container">
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('menu')">Menu Management</button>
-            <button class="tab" onclick="showTab('orders')">Orders</button>
-            <button class="tab" onclick="showTab('tracking')">Order Tracking</button>
+    <aside class="sidebar">
+        <div class="brand">
+            <h2>Lumière</h2>
+            <p style="font-size: 0.8rem; color: #666; letter-spacing: 2px;">ADMIN PANEL</p>
+        </div>
+        <ul class="nav-links">
+            <li class="nav-item active" onclick="showTab('dashboard')">
+                <i class="fas fa-th-large"></i> <span>Dashboard</span>
+            </li>
+            <li class="nav-item" onclick="showTab('menu')">
+                <i class="fas fa-utensils"></i> <span>Menu</span>
+            </li>
+            <li class="nav-item" onclick="showTab('orders')">
+                <i class="fas fa-shopping-bag"></i> <span>Orders</span>
+            </li>
+            <li class="nav-item" onclick="showTab('tracking')">
+                <i class="fas fa-truck"></i> <span>Tracking</span>
+            </li>
+        </ul>
+        <button class="logout-btn" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+    </aside>
+
+    <main class="main-content">
+
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="page-header">
+                <h2>Dashboard Overview</h2>
+                <div style="color: #666;">Welcome back, Admin</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card card-revenue">
+                    <h3>Total Revenue</h3>
+                    <div class="value" id="stat-revenue">₦0.00</div>
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-card card-orders">
+                    <h3>Total Orders</h3>
+                    <div class="value" id="stat-orders">0</div>
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-card card-pending">
+                    <h3>Pending Orders</h3>
+                    <div class="value" id="stat-pending">0</div>
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-wrapper">
+                    <h3>Recent Revenue Trend</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <h3>Order Status Distribution</h3>
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
         </div>
 
-        <div id="menu-tab" class="tab-content active">
-            <h2>Menu Management</h2>
+        <div id="menu-tab" class="tab-content">
+            <div class="page-header">
+                <h2>Menu Management</h2>
+            </div>
+
             <div id="alert-container"></div>
 
-            <form id="menu-form" enctype="multipart/form-data">
+            <form id="menu-form" class="admin-form" enctype="multipart/form-data">
+                <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Add New Item</h3>
+
                 <div class="form-group">
-                    <label>Food Title </label>
-                    <input type="text" name="title" required>
+                    <label>Food Title *</label>
+                    <input type="text" name="title" required placeholder="e.g. Truffle Pasta">
                 </div>
 
                 <div class="form-group">
-                    <label>Description </label>
-                    <textarea name="description" required></textarea>
+                    <label>Description *</label>
+                    <textarea name="description" required placeholder="Describe the dish..."></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label>Price (NGN) </label>
-                    <input type="number" name="price" step="0.01" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Category *</label>
-                    <select name="category" required>
-                        <option value="">Select Category</option>
-                        <option value="starters">Starters</option>
-                        <option value="main">Main Courses</option>
-                        <option value="specials">Chef's Specials</option>
-                        <option value="desserts">Desserts</option>
-                        <option value="drinks">Drinks</option>
-                        <option value="wine">Wine List</option>
-                        <option value="kids">Kid's Menu</option>
-                        <option value="dietary">Dietary Options</option>
-                    </select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Price (₦) *</label>
+                        <input type="number" name="price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select name="category" required>
+                            <option value="">Select Category</option>
+                            <option value="starters">Starters</option>
+                            <option value="main">Main Courses</option>
+                            <option value="specials">Chef's Specials</option>
+                            <option value="desserts">Desserts</option>
+                            <option value="drinks">Drinks</option>
+                            <option value="wine">Wine List</option>
+                            <option value="kids">Kid's Menu</option>
+                            <option value="dietary">Dietary Options</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="form-group">
@@ -344,71 +594,78 @@
                 <button type="submit" class="btn btn-primary">Add Menu Item</button>
             </form>
 
-            <h3 style="margin-top: 3rem;">Current Menu Items</h3>
+            <h3 style="margin-top: 3rem; margin-bottom: 1.5rem;">Current Menu Items</h3>
             <div id="menu-items" class="menu-grid"></div>
         </div>
 
         <div id="orders-tab" class="tab-content">
-            <h2>Orders</h2>
-            <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Email</th>
-                        <th>Total</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="orders-list"></tbody>
-            </table>
+            <div class="page-header">
+                <h2>Customer Orders</h2>
+            </div>
+            <div class="table-container">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="tracking-tab" class="tab-content">
-            <h2>Update Order Tracking</h2>
-            <div class="form-group">
-                <label>Select Order</label>
-                <select id="tracking-order-select" onchange="loadOrderDetails()">
-                    <option value="">Select an order</option>
-                </select>
+            <div class="page-header">
+                <h2>Order Tracking Update</h2>
             </div>
 
-            <div id="tracking-form-container" style="display: none;">
-                <form id="tracking-form">
-                    <input type="hidden" id="tracking-order-id">
+            <div class="admin-form">
+                <div class="form-group">
+                    <label>Select Order to Update</label>
+                    <select id="tracking-order-select" onchange="loadOrderDetails()">
+                        <option value="">-- Select an order --</option>
+                    </select>
+                </div>
 
-                    <div class="form-group">
-                        <label>Status *</label>
-                        <select id="tracking-status" required>
-                            <option value="pending">Order Placed</option>
-                            <option value="confirmed">Order Confirmed</option>
-                            <option value="preparing">Preparing</option>
-                            <option value="ready">Ready for Pickup/Delivery</option>
-                            <option value="out_for_delivery">Out for Delivery</option>
-                            <option value="delivered">Delivered</option>
-                        </select>
-                    </div>
+                <div id="tracking-form-container" style="display: none;">
+                    <form id="tracking-form">
+                        <input type="hidden" id="tracking-order-id">
 
-                    <div class="form-group">
-                        <label>Location</label>
-                        <input type="text" id="tracking-location" placeholder="e.g., Restaurant Kitchen, On Route">
-                    </div>
+                        <div class="form-group">
+                            <label>New Status *</label>
+                            <select id="tracking-status" required>
+                                <option value="pending">Order Placed</option>
+                                <option value="confirmed">Order Confirmed</option>
+                                <option value="preparing">Preparing</option>
+                                <option value="ready">Ready for Pickup/Delivery</option>
+                                <option value="out_for_delivery">Out for Delivery</option>
+                                <option value="delivered">Delivered</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group">
-                        <label>Update Message *</label>
-                        <textarea id="tracking-message" required
-                            placeholder="e.g., Your order is being prepared by our chef"></textarea>
-                    </div>
+                        <div class="form-group">
+                            <label>Current Location</label>
+                            <input type="text" id="tracking-location" placeholder="e.g., Kitchen, En Route">
+                        </div>
 
-                    <button type="submit" class="btn btn-primary">Update Tracking</button>
-                </form>
+                        <div class="form-group">
+                            <label>Update Message for Customer *</label>
+                            <textarea id="tracking-message" required
+                                placeholder="e.g., Your order is being prepared by our chef"></textarea>
+                        </div>
 
-                <div id="tracking-history" style="margin-top: 2rem;"></div>
+                        <button type="submit" class="btn btn-primary">Update Tracking</button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+
+    </main>
 
     <script>
         const API_URL = 'http://localhost:8080/api';
@@ -416,10 +673,9 @@
         // --- AUTHENTICATION CHECK ---
         const token = localStorage.getItem('adminToken');
         if (!token) {
-            window.location.href = 'login.html'; // Redirect to login if no token
+            window.location.href = 'login.html';
         }
 
-        // Helper to handle Unauthorized (401) responses
         function handleAuthError(response) {
             if (response.status === 401) {
                 alert("Session expired. Please login again.");
@@ -428,32 +684,120 @@
             }
             return false;
         }
-        // --- END AUTH CHECK ---
 
-        // Tab switching
+        // --- TAB SWITCHING ---
         function showTab(tabName) {
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            // Remove active class from all sidebar items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
 
-            event.target.classList.add('active');
+            // Activate clicked item and content
+            // We find the nav item that called this by checking the onclick attribute logic or just manual mapping
+            // Simpler approach: Highlight the one that matches
+            const clickedItem = event ? event.currentTarget : document.querySelector(`.nav-item[onclick="showTab('${tabName}')"]`);
+            if (clickedItem) clickedItem.classList.add('active');
+
             document.getElementById(`${tabName}-tab`).classList.add('active');
 
-            if (tabName === 'orders' || tabName === 'tracking') {
-                loadOrders();
-            }
-            if (tabName === 'menu') {
-                loadMenuItems();
+            if (tabName === 'dashboard') loadDashboardStats();
+            if (tabName === 'orders' || tabName === 'tracking') loadOrders();
+            if (tabName === 'menu') loadMenuItems();
+        }
+
+        // --- DASHBOARD LOGIC ---
+        let revenueChart = null;
+        let statusChart = null;
+
+        async function loadDashboardStats() {
+            try {
+                const response = await fetch(`${API_URL}/orders`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (handleAuthError(response)) return;
+
+                const orders = await response.json();
+
+                const totalOrders = orders.length;
+                const totalRevenue = orders.reduce((sum, order) => sum + order.total_amount, 0);
+                const pendingOrders = orders.filter(o => o.status === 'pending').length;
+
+                document.getElementById('stat-revenue').textContent = `₦${totalRevenue.toLocaleString()}`;
+                document.getElementById('stat-orders').textContent = totalOrders;
+                document.getElementById('stat-pending').textContent = pendingOrders;
+
+                updateCharts(orders);
+
+            } catch (error) {
+                console.error("Dashboard error:", error);
             }
         }
 
-        // Show alert
+        function updateCharts(orders) {
+            const statusCounts = {};
+            orders.forEach(o => {
+                statusCounts[o.status] = (statusCounts[o.status] || 0) + 1;
+            });
+
+            const recentOrders = orders.slice(0, 8); // Last 8 orders
+            const orderLabels = recentOrders.map(o => `#${o.tracking_id.split('-')[1]}`);
+            const orderAmounts = recentOrders.map(o => o.total_amount);
+
+            if (revenueChart) revenueChart.destroy();
+            if (statusChart) statusChart.destroy();
+
+            const ctx1 = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: orderLabels,
+                    datasets: [{
+                        label: 'Revenue (₦)',
+                        data: orderAmounts,
+                        backgroundColor: '#d4af37',
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+
+            const ctx2 = document.getElementById('statusChart').getContext('2d');
+            statusChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: [
+                            '#ff9f43', // Pending - Orange
+                            '#54a0ff', // Confirmed - Blue
+                            '#1dd1a1', // Ready - Green
+                            '#10ac84', // Delivered - Dark Green
+                            '#576574'  // Other - Grey
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, cutout: '70%' }
+            });
+        }
+
+        // --- UTILS ---
         function showAlert(message, type = 'success') {
             const container = document.getElementById('alert-container');
-            container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            const icon = type === 'success' ? '<i class="fas fa-check-circle" style="margin-right:10px"></i>' : '<i class="fas fa-exclamation-circle" style="margin-right:10px"></i>';
+            container.innerHTML = `<div class="alert alert-${type}">${icon} ${message}</div>`;
             setTimeout(() => container.innerHTML = '', 5000);
         }
 
-        // Preview image
         function previewImage(event) {
             const preview = document.getElementById('image-preview');
             const file = event.target.files[0];
@@ -463,7 +807,7 @@
             }
         }
 
-        // Add menu item
+        // --- MENU ACTIONS ---
         document.getElementById('menu-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -471,9 +815,7 @@
             try {
                 const response = await fetch(`${API_URL}/menu`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Add Token
-                    },
+                    headers: { 'Authorization': `Bearer ${token}` },
                     body: formData
                 });
 
@@ -492,10 +834,8 @@
             }
         });
 
-        // Load menu items
         async function loadMenuItems() {
             try {
-                // Technically public, but good to have token if needed in future
                 const response = await fetch(`${API_URL}/menu`);
                 const items = await response.json();
 
@@ -505,9 +845,11 @@
                         <img src="${API_URL.replace('/api', '')}${item.image_url}" alt="${item.title}">
                         <div class="menu-card-body">
                             <h3>${item.title}</h3>
-                            <p>${item.category}</p>
-                            <div class="price">$${item.price}</div>
-                            <button class="btn btn-danger" onclick="deleteMenuItem(${item.id})">Delete</button>
+                            <span class="menu-price">₦${item.price.toLocaleString()}</span>
+                            <div style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">${item.category}</div>
+                            <button class="btn btn-danger" onclick="deleteMenuItem(${item.id})" style="width: 100%">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
                         </div>
                     </div>
                 `).join('');
@@ -516,22 +858,19 @@
             }
         }
 
-        // Delete menu item
         async function deleteMenuItem(id) {
             if (!confirm('Are you sure you want to delete this item?')) return;
 
             try {
                 const response = await fetch(`${API_URL}/menu/${id}`, {
                     method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Add Token
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (handleAuthError(response)) return;
 
                 if (response.ok) {
-                    showAlert('Menu item deleted successfully!');
+                    showAlert('Item deleted!');
                     loadMenuItems();
                 }
             } catch (error) {
@@ -539,13 +878,11 @@
             }
         }
 
-        // Load orders
+        // --- ORDER ACTIONS ---
         async function loadOrders() {
             try {
                 const response = await fetch(`${API_URL}/orders`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}` // Add Token
-                    }
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
 
                 if (handleAuthError(response)) return;
@@ -555,42 +892,52 @@
                 const tbody = document.getElementById('orders-list');
                 tbody.innerHTML = orders.map(order => `
                     <tr>
-                        <td>${order.tracking_id}</td>
-                        <td>${order.customer_name}</td>
-                        <td>${order.customer_email}</td>
-                        <td>$${order.total_amount}</td>
-                        <td><span class="status-badge status-${order.status}">${order.status}</span></td>
+                        <td><strong>${order.tracking_id}</strong></td>
+                        <td>
+                            ${order.customer_name}<br>
+                            <span style="font-size:0.85rem; color:#666">${order.customer_email}</span>
+                        </td>
+                        <td style="font-weight:bold; color:var(--dark)">₦${order.total_amount.toLocaleString()}</td>
+                        <td><span class="status-badge status-${order.status}">${order.status.replace('_', ' ')}</span></td>
                         <td>${new Date(order.created_at).toLocaleDateString()}</td>
                         <td>
-                            <button class="btn btn-primary" onclick="alert('View details feature to be implemented')">View</button>
+                            <button class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="loadOrderDetailsForTracking('${order.id}')">
+                                <i class="fas fa-edit"></i> Manage
+                            </button>
                         </td>
                     </tr>
                 `).join('');
 
-                // Update tracking dropdown
+                // Update dropdown for tracking tab
                 const select = document.getElementById('tracking-order-select');
-                select.innerHTML = '<option value="">Select an order</option>' +
+                select.innerHTML = '<option value="">-- Select an order --</option>' +
                     orders.map(order => `<option value="${order.id}">${order.tracking_id} - ${order.customer_name}</option>`).join('');
             } catch (error) {
                 console.error('Error loading orders:', error);
             }
         }
 
-        // Load order details for tracking
+        // Helper to jump to tracking tab with selected order
+        function loadOrderDetailsForTracking(orderId) {
+            showTab('tracking');
+            const select = document.getElementById('tracking-order-select');
+            select.value = orderId;
+            loadOrderDetails(); // Trigger the load
+        }
+
         function loadOrderDetails() {
             const orderId = document.getElementById('tracking-order-select').value;
             if (orderId) {
                 document.getElementById('tracking-form-container').style.display = 'block';
                 document.getElementById('tracking-order-id').value = orderId;
+                // Ideally fetch specific order status here to pre-fill form
             } else {
                 document.getElementById('tracking-form-container').style.display = 'none';
             }
         }
 
-        // Update tracking
         document.getElementById('tracking-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const orderId = document.getElementById('tracking-order-id').value;
             const status = document.getElementById('tracking-status').value;
             const location = document.getElementById('tracking-location').value;
@@ -601,7 +948,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` // Add Token
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify({ status, location, update_message: message })
                 });
@@ -617,11 +964,11 @@
             }
         });
 
-        // Initial load
-        loadMenuItems();
+        // Init
+        loadDashboardStats();
 
         function logout() {
-            localStorage.removeItem('adminToken'); // Clear token
+            localStorage.removeItem('adminToken');
             window.location.href = 'login.html';
         }
     </script>

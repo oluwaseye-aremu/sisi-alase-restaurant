@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order | Lumière</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- TRACKING SPECIFIC STYLES --- */
+        .tracking-section {
+            padding: 8rem 2rem 4rem;
+            min-height: 80vh;
+            background: #f9f9f9;
+        }
+
+        .track-form-container {
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            text-align: center;
+        }
+
+        .track-input-group {
+            display: flex;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 50px;
+            overflow: hidden;
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        .track-input-group input {
+            flex: 1;
+            padding: 1.2rem 2rem;
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+        }
+
+        .track-input-group button {
+            background: #1a1a1a;
+            color: #d4af37;
+            border: none;
+            padding: 0 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .track-input-group button:hover {
+            background: #d4af37;
+            color: #1a1a1a;
+        }
+
+        /* Result Card */
+        .order-status-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: none;
+            /* Hidden by default */
+            animation: slideUp 0.5s ease;
+        }
+
+        .status-header {
+            background: #1a1a1a;
+            color: white;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-header h2 {
+            color: #d4af37;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .current-status-badge {
+            background: #d4af37;
+            color: #1a1a1a;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .order-info {
+            padding: 2rem;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            background: #fffcf5;
+        }
+
+        /* Vertical Timeline */
+        .timeline {
+            padding: 3rem 2rem;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50px;
+            top: 3rem;
+            bottom: 3rem;
+            width: 2px;
+            background: #e0e0e0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 80px;
+            margin-bottom: 2.5rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 41px;
+            /* Center on line */
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #ccc;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .timeline-item.active .timeline-dot {
+            border-color: #d4af37;
+            background: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+        }
+
+        .timeline-time {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 0.2rem;
+        }
+
+        .timeline-content h4 {
+            margin: 0 0 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+        }
+
+        .timeline-content p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .status-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+
+            .order-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Lumière</a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="track.html" class="active" style="color: #d4af37;">Track Order</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="tracking-section">
+        <div class="container">
+            <div class="track-form-container">
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 1rem;">Track Your
+                    Order</h1>
+                <p style="color: #666; margin-bottom: 2rem;">Enter your Order ID found on your receipt or email.</p>
+
+                <form id="track-form" onsubmit="handleTrack(event)">
+                    <div class="track-input-group">
+                        <input type="text" id="tracking-id" placeholder="e.g. ORD-173392..." required>
+                        <button type="submit">TRACK</button>
+                    </div>
+                </form>
+                <div id="error-message" class="error-msg">Order not found. Please check your ID and try again.</div>
+            </div>
+
+            <div id="tracking-result" class="order-status-card">
+                <div class="status-header">
+                    <div>
+                        <span style="font-size: 0.9rem; opacity: 0.8;">ORDER ID</span>
+                        <h2 id="disp-id">#ORD-000</h2>
+                    </div>
+                    <div class="current-status-badge" id="disp-status">PREPARING</div>
+                </div>
+
+                <div class="order-info">
+                    <div>
+                        <strong>Customer</strong><br>
+                        <span id="disp-name">John Doe</span>
+                    </div>
+                    <div>
+                        <strong>Total Amount</strong><br>
+                        <span id="disp-total" style="color: #d4af37; font-weight: bold;">₦0.00</span>
+                    </div>
+                    <div>
+                        <strong>Date</strong><br>
+                        <span id="disp-date">Dec 12, 2025</span>
+                    </div>
+                </div>
+
+                <div class="timeline" id="timeline-container">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom text-center">
+                <p>&copy; 2024 Lumière Restaurant. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        const API_URL = 'http://localhost:8080/api';
+
+        // AUTO-TRACK LOGIC
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check if there is an ID in the URL (e.g. track.html?id=ORD-123)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlId = urlParams.get('id');
+
+            if (urlId) {
+                // Fill the box
+                document.getElementById('tracking-id').value = urlId;
+                // Click the button automatically
+                // We create a fake event to pass to handleTrack
+                handleTrack({ preventDefault: () => { } });
+            }
+        });
+
+        async function handleTrack(e) {
+            e.preventDefault();
+            const inputId = document.getElementById('tracking-id').value.trim();
+            const errorDiv = document.getElementById('error-message');
+            const resultCard = document.getElementById('tracking-result');
+
+            // Reset UI
+            errorDiv.style.display = 'none';
+            resultCard.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/orders/tracking/${inputId}`);
+
+                if (!response.ok) {
+                    throw new Error('Order not found');
+                }
+
+                const data = await response.json();
+                renderTrackingData(data);
+
+            } catch (error) {
+                console.error(error);
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function renderTrackingData(data) {
+            const order = data.order;
+            const history = data.tracking; // Array of tracking updates
+
+            // 1. Fill Header Info
+            document.getElementById('disp-id').textContent = order.tracking_id;
+            document.getElementById('disp-status').textContent = order.status.replace('_', ' ').toUpperCase();
+            document.getElementById('disp-name').textContent = order.customer_name;
+            document.getElementById('disp-total').textContent = `₦${order.total_amount.toLocaleString()}`;
+            document.getElementById('disp-date').textContent = new Date(order.created_at).toLocaleDateString();
+
+            // 2. Build Timeline
+            const timelineContainer = document.getElementById('timeline-container');
+            timelineContainer.innerHTML = ''; // Clear previous
+
+            // If history exists, loop through it. The backend returns latest first, 
+            // but for a timeline, usually we want old -> new, or new -> old.
+            // Let's stick to the order sent by backend.
+
+            if (history && history.length > 0) {
+                history.forEach((log, index) => {
+                    // Make the first item (latest update) look "Active"
+                    const isActive = index === 0 ? 'active' : '';
+
+                    const date = new Date(log.updated_at);
+                    const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const dateStr = date.toLocaleDateString();
+
+                    const html = `
+                        <div class="timeline-item ${isActive}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-time">${dateStr} • ${timeStr}</div>
+                                <h4>${log.status}</h4>
+                                <p>${log.update_message} <br> <small style="color:#999"><i class="fas fa-map-marker-alt"></i> ${log.location}</small></p>
+                            </div>
+                        </div>
+                    `;
+                    timelineContainer.innerHTML += html;
+                });
+            } else {
+                timelineContainer.innerHTML = '<p style="text-align:center; color:#999">No tracking updates available yet.</p>';
+            }
+
+            // 3. Show Card
+            document.getElementById('tracking-result').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

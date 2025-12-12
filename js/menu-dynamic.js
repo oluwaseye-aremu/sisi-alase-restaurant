@@ -2,16 +2,16 @@
 const API_URL = 'http://localhost:8080/api';
 
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+let allMenuItems = []; // Store all items globally for search
 
 // --- 1. HELPER FUNCTIONS (Defined First) ---
 
 function updateSection(sectionId, items) {
     const container = document.getElementById(`${sectionId}-grid`);
-    // If the section doesn't exist in the HTML, just skip it silently
     if (!container) return;
 
     if (items.length === 0) {
-        container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #666;">No items available in this category.</p>';
+        container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: #666;">No items match your search.</p>';
         return;
     }
 
@@ -55,7 +55,6 @@ function displayMenuItems(items) {
         }
     });
 
-    // Update all sections
     updateSection('starters', categories.starters);
     updateSection('main', categories.main);
     updateSection('specials', categories.specials);
@@ -75,6 +74,7 @@ async function loadMenuItems(category = '') {
         if (!response.ok) throw new Error('Network response was not ok');
         const items = await response.json();
 
+        allMenuItems = items; // Save to global variable
         displayMenuItems(items);
     } catch (error) {
         console.error('Error loading menu:', error);
@@ -82,7 +82,21 @@ async function loadMenuItems(category = '') {
     }
 }
 
-// --- 3. CART & UI HELPERS ---
+// --- 3. SEARCH LOGIC ---
+
+function handleSearch(e) {
+    const searchTerm = e.target.value.toLowerCase();
+
+    const filteredItems = allMenuItems.filter(item => {
+        return item.title.toLowerCase().includes(searchTerm) ||
+            item.description.toLowerCase().includes(searchTerm) ||
+            item.category.toLowerCase().includes(searchTerm);
+    });
+
+    displayMenuItems(filteredItems);
+}
+
+// --- 4. CART & UI HELPERS ---
 
 function addToCart(itemId) {
     const itemElement = document.querySelector(`[data-item*='"id":${itemId}']`);
@@ -115,19 +129,16 @@ function viewDetails(itemId) {
     const item = JSON.parse(itemElement.dataset.item);
     const modal = document.getElementById('foodModal');
 
-    // Safety checks for modal elements
     if (document.getElementById('modalImg')) document.getElementById('modalImg').src = `${API_URL.replace('/api', '')}${item.image_url}`;
     if (document.getElementById('modalTitle')) document.getElementById('modalTitle').textContent = item.title;
     if (document.getElementById('modalDesc')) document.getElementById('modalDesc').textContent = item.description;
-    if (document.getElementById('modalPrice')) document.getElementById('modalPrice').textContent = `$${item.price.toFixed(2)}`;
+    if (document.getElementById('modalPrice')) document.getElementById('modalPrice').textContent = `₦${item.price.toLocaleString()}`;
     if (document.getElementById('modalIngredients')) document.getElementById('modalIngredients').textContent = item.ingredients || 'Not specified';
 
-    // Update button inside modal
     const orderBtn = document.querySelector('.modal-details .btn-primary');
     if (orderBtn) {
         orderBtn.onclick = () => {
             addToCart(item.id);
-            // Hide modal logic
             if (typeof hideModal === 'function') {
                 hideModal();
             } else {
@@ -147,7 +158,6 @@ function viewDetails(itemId) {
     }
 }
 
-// Global hideModal (matches script.js logic)
 function hideModal() {
     const modal = document.getElementById('foodModal');
     if (modal) {
@@ -228,6 +238,8 @@ function showError(message) {
 }
 
 function filterByCategory(category) {
+    // If filtering by button, we just reload from DB for simplicity, 
+    // or we could filter allMenuItems locally. reloading is safer for sync.
     loadMenuItems(category);
 }
 
@@ -263,14 +275,19 @@ function addCategoryFilters() {
     }
 }
 
-// --- 4. INITIALIZATION ---
+// --- 5. INITIALIZATION ---
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are on a page that needs menu items
     if (document.getElementById('starters-grid') || document.querySelector('.grid-3')) {
         createSectionGrids();
         loadMenuItems();
         addCategoryFilters();
+
+        // ATTACH SEARCH LISTENER
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', handleSearch);
+        }
     }
     updateCartCount();
 });
