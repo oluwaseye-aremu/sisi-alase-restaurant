@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Lumière</title>
+    <title>Admin Dashboard | Sisi Alase Restaurant</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
         rel="stylesheet">
-
+    <link rel="icon" type="image/png" href="/assets/sisi-alase-removebg-preview.png">
     <style>
         :root {
             --primary: #d4af37;
@@ -479,7 +479,7 @@
 
     <aside class="sidebar">
         <div class="brand">
-            <h2>Lumière</h2>
+            <h2>Sisi Alase</h2>
             <p style="font-size: 0.8rem; color: #666; letter-spacing: 2px;">ADMIN PANEL</p>
         </div>
         <ul class="nav-links">
@@ -550,22 +550,22 @@
                 <h3 style="margin-bottom: 1.5rem; color: var(--primary);">Add New Item</h3>
 
                 <div class="form-group">
-                    <label>Food Title *</label>
+                    <label>Food Title </label>
                     <input type="text" name="title" required placeholder="e.g. Truffle Pasta">
                 </div>
 
                 <div class="form-group">
-                    <label>Description *</label>
+                    <label>Description </label>
                     <textarea name="description" required placeholder="Describe the dish..."></textarea>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                     <div class="form-group">
-                        <label>Price (₦) *</label>
+                        <label>Price (₦) </label>
                         <input type="number" name="price" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label>Category *</label>
+                        <label>Category </label>
                         <select name="category" required>
                             <option value="">Select Category</option>
                             <option value="starters">Starters</option>
@@ -586,7 +586,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Image *</label>
+                    <label>Image </label>
                     <input type="file" name="image" accept="image/*" required onchange="previewImage(event)">
                     <img id="image-preview" class="image-preview" style="display: none;">
                 </div>
@@ -637,7 +637,7 @@
                         <input type="hidden" id="tracking-order-id">
 
                         <div class="form-group">
-                            <label>New Status *</label>
+                            <label>New Status </label>
                             <select id="tracking-status" required>
                                 <option value="pending">Order Placed</option>
                                 <option value="confirmed">Order Confirmed</option>
@@ -654,7 +654,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Update Message for Customer *</label>
+                            <label>Update Message for Customer </label>
                             <textarea id="tracking-message" required
                                 placeholder="e.g., Your order is being prepared by our chef"></textarea>
                         </div>

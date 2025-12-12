@@ -7,6 +7,7 @@
     <title>Shopping Cart | Sisi Alase</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="/assets/sisi-alase-removebg-preview.png">
     <style>
         .logo img {
             max-height: 50px;
@@ -245,19 +246,19 @@
                 <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
                 <div class="summary-row">
                     <span>Subtotal:</span>
-                    <span id="subtotal">$0.00</span>
+                    <span id="subtotal">₦0.00</span>
                 </div>
                 <div class="summary-row">
                     <span>Tax (10%):</span>
-                    <span id="tax">$0.00</span>
+                    <span id="tax">₦0.00</span>
                 </div>
                 <div class="summary-row">
                     <span>Delivery:</span>
-                    <span id="delivery">$5.00</span>
+                    <span id="delivery">₦5.00</span>
                 </div>
                 <div class="summary-row">
                     <span>Total:</span>
-                    <span id="total">$0.00</span>
+                    <span id="total">₦0.00</span>
                 </div>
                 <button class="checkout-btn" onclick="proceedToCheckout()">
                     Proceed to Checkout <i class="fas fa-arrow-right"></i>
@@ -293,16 +294,16 @@
                         <img src="${API_URL.replace('/api', '')}${item.image_url}" alt="${item.title}">
                     </div>
                     <div class="cart-item-details">
-                        <h3>${item.title}</h3>
-                        <div class="cart-item-price">$${item.price.toFixed(2)} each</div>
+                        <h3>₦${item.title}</h3>
+                        <div class="cart-item-price">₦${item.price.toFixed(2)} each</div>
                     </div>
                     <div class="quantity-controls">
                         <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
-                        <span class="quantity-value">${item.quantity}</span>
+                        <span class="quantity-value">₦${item.quantity}</span>
                         <button class="quantity-btn" onclick="updateQuantity(${index}, 1)">+</button>
                     </div>
                     <div class="cart-item-controls">
-                        <div class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</div>
+                        <div class="cart-item-price">₦${(item.price * item.quantity).toFixed(2)}</div>
                         <button class="remove-btn" onclick="removeItem(${index})">
                             <i class="fas fa-trash"></i> Remove
                         </button>
@@ -338,10 +339,10 @@
             const delivery = cart.length > 0 ? 5.00 : 0;
             const total = subtotal + tax + delivery;
 
-            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
-            document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
-            document.getElementById('delivery').textContent = `$${delivery.toFixed(2)}`;
-            document.getElementById('total').textContent = `$${total.toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `₦${subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `₦${tax.toFixed(2)}`;
+            document.getElementById('delivery').textContent = `₦${delivery.toFixed(2)}`;
+            document.getElementById('total').textContent = `₦${total.toFixed(2)}`;
         }
 
         function proceedToCheckout() {
