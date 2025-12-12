@@ -4,65 +4,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Your Order | SISI ALASE</title>
+    <title>Track Your Order | Sisi Alase Restaurant</title>
+
+    <link rel="stylesheet" href="/css/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- Navbar Logo Fix (Same as other pages) --- */
+        .logo img {
+            max-height: 50px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 10px;
         }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        /* --- TRACKING SPECIFIC STYLES --- */
+        /* We keep your tracking styles but ensure they play nice with the main CSS */
 
         body {
-            font-family: 'Lato', sans-serif;
-            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-            min-height: 100vh;
+            /* Overwrite body background only for the content area, or let style.css handle it */
+            /* Using a subtle background for the tracking page specifically */
+            background: #f9f9f9;
         }
 
-        .header {
-            background: rgba(212, 175, 55, 0.1);
-            backdrop-filter: blur(10px);
-            color: #d4af37;
-            padding: 2rem;
-            text-align: center;
-            border-bottom: 2px solid #d4af37;
+        .tracking-page-container {
+            padding-top: 8rem;
+            /* Space for fixed navbar */
+            padding-bottom: 4rem;
+            min-height: 80vh;
         }
 
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 3rem auto;
+        .container-track {
+            max-width: 800px;
+            margin: 0 auto;
             padding: 0 2rem;
         }
 
         .search-section {
             background: white;
-            padding: 2rem;
+            padding: 3rem 2rem;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             margin-bottom: 2rem;
+            text-align: center;
         }
 
         .search-section h2 {
             color: #1a1a1a;
-            margin-bottom: 1.5rem;
-            text-align: center;
+            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+        }
+
+        .search-section p {
+            color: #666;
+            margin-bottom: 2rem;
         }
 
         .search-form {
             display: flex;
-            gap: 1rem;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         .search-input {
             flex: 1;
             padding: 1rem;
-            border: 2px solid #ddd;
+            border: 2px solid #eee;
             border-radius: 8px;
             font-size: 1rem;
+            font-family: 'Lato', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: #d4af37;
+            outline: none;
         }
 
         .search-btn {
@@ -82,76 +109,173 @@
             transform: translateY(-2px);
         }
 
-        .tracking-section {
+        /* Result Section */
+        .tracking-result-section {
             display: none;
             background: white;
-            padding: 2rem;
+            padding: 0;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
         }
 
-        .tracking-section.show {
+        .tracking-result-section.show {
             display: block;
         }
 
         .order-header {
-            border-bottom: 2px solid #d4af37;
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .order-header h2 {
-            color: #1a1a1a;
-            margin-bottom: 1rem;
-        }
-
-        .order-info {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            background: #1a1a1a;
+            color: white;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
             gap: 1rem;
-            margin-top: 1rem;
         }
 
-        .info-item {
-            background: #f9f9f9;
-            padding: 1rem;
-            border-radius: 8px;
+        .order-header h3 {
+            color: #d4af37;
+            margin-bottom: 0.2rem;
+            font-size: 1.2rem;
         }
 
-        .info-label {
-            color: #666;
+        .order-header span {
             font-size: 0.9rem;
-            margin-bottom: 0.3rem;
+            opacity: 0.8;
         }
 
-        .info-value {
-            color: #1a1a1a;
-            font-weight: 600;
+        .order-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            padding: 2rem;
+            background: #f8f8f8;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-box span {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-box strong {
             font-size: 1.1rem;
+            color: #333;
+        }
+
+        /* Timeline */
+        .timeline-container {
+            padding: 3rem 2rem;
         }
 
         .timeline {
             position: relative;
-            padding-left: 3rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 1rem;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: #ddd;
+            padding-left: 2rem;
+            border-left: 2px solid #eee;
+            margin-left: 1rem;
         }
 
         .timeline-item {
             position: relative;
-            margin-bottom: 2rem;
-            animation: fadeIn 0.5s ease-in;
+            margin-bottom: 2.5rem;
+            padding-left: 2rem;
         }
 
-        @keyframes fadeIn {
+        .timeline-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2.6rem;
+            /* Adjust to sit on the line */
+            top: 0;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border: 4px solid #ccc;
+            border-radius: 50%;
+            z-index: 2;
+        }
+
+        .timeline-item.active .timeline-dot {
+            border-color: #d4af37;
+            background: #d4af37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: #999;
+            margin-bottom: 0.3rem;
+        }
+
+        .timeline-content h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .timeline-content p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Items List */
+        .order-items-list {
+            padding: 0 2rem 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .order-items-list h3 {
+            margin: 2rem 0 1rem;
+            font-size: 1.2rem;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 0.95rem;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .error-message {
+            background: #fff0f0;
+            color: #d32f2f;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #ffcdd2;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #666;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .back-btn:hover {
+            color: #d4af37;
+        }
+
+        @keyframes slideUp {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -163,200 +287,167 @@
             }
         }
 
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -2.5rem;
-            top: 0.5rem;
-            width: 1.5rem;
-            height: 1.5rem;
-            background: #d4af37;
-            border: 4px solid white;
-            border-radius: 50%;
-            box-shadow: 0 0 0 3px #d4af37;
-            z-index: 1;
-        }
-
-        .timeline-item.current::before {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                box-shadow: 0 0 0 3px #d4af37;
-            }
-
-            50% {
-                box-shadow: 0 0 0 8px rgba(212, 175, 55, 0.5);
-            }
-        }
-
-        .timeline-content {
-            background: #f9f9f9;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid #d4af37;
-        }
-
-        .timeline-status {
-            color: #d4af37;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-location {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-message {
-            color: #333;
-            line-height: 1.6;
-        }
-
-        .timeline-time {
-            color: #999;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        .items-list {
-            margin-top: 2rem;
-        }
-
-        .items-list h3 {
-            color: #1a1a1a;
-            margin-bottom: 1rem;
-        }
-
-        .item {
-            display: flex;
-            justify-content: space-between;
-            padding: 1rem;
-            background: #f9f9f9;
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-        }
-
-        .error-message {
-            background: #f8d7da;
-            color: #842029;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #f5c2c7;
-        }
-
-        .back-btn {
-            display: inline-block;
-            margin-top: 1rem;
-            padding: 0.8rem 1.5rem;
-            background: #1a1a1a;
-            color: #d4af37;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-
-        .back-btn:hover {
-            background: #333;
-        }
-
-        @media (max-width: 768px) {
+        @media (max-width: 600px) {
             .search-form {
                 flex-direction: column;
             }
 
-            .order-info {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 1.8rem;
+            .order-header {
+                flex-direction: column;
+                text-align: center;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>🔍 Track Your Order</h1>
-        <p>Enter your tracking ID to see your order status</p>
-    </div>
 
-    <div class="container">
-        <!-- Search Section -->
-        <div class="search-section">
-            <h2>Enter Tracking ID</h2>
-            <form class="search-form" onsubmit="trackOrder(event)">
-                <input type="text" id="tracking-input" class="search-input" placeholder="e.g., ORD-1234567890" required>
-                <button type="submit" class="search-btn">Track Order</button>
-            </form>
-        </div>
-
-        <!-- Error Message -->
-        <div id="error-section" style="display: none;">
-            <div class="error-message">
-                <h3>❌ Order Not Found</h3>
-                <p>We couldn't find an order with that tracking ID. Please check and try again.</p>
-                <button class="back-btn" onclick="resetTracking()">Try Again</button>
+    <div class="top-bar">
+        <div class="ticker-wrap">
+            <div class="ticker">
+                <div class="ticker-item">Welcome to Sisi Alase Restaurant - Experience the finest dining in the city.
+                </div>
+                <div class="ticker-item">New Seasonal Menu Now Available!</div>
+                <div class="ticker-item">Live Jazz every Friday night.</div>
             </div>
         </div>
+    </div>
 
-        <!-- Tracking Section -->
-        <div id="tracking-section" class="tracking-section">
-            <div class="order-header">
-                <h2>Order Details</h2>
-                <div class="order-info">
-                    <div class="info-item">
-                        <div class="info-label">Tracking ID</div>
-                        <div class="info-value" id="order-tracking-id">-</div>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><img src="/assets/sisi-alase-removebg-preview.png" alt=""><span>Sisi
+                    Alase</span></a>
+            <button class="nav-toggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="contact.html#reservations" class="btn-reserve">Book a Table</a></li>
+                <li>
+                    <a href="cart.html" style="position: relative;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" style="display: none;"></span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="tracking-page-container">
+        <div class="container-track">
+
+            <div class="search-section">
+                <h2>Track Your Order</h2>
+                <p>Enter the Order ID from your receipt to see live updates.</p>
+                <form class="search-form" onsubmit="trackOrder(event)">
+                    <input type="text" id="tracking-input" class="search-input" placeholder="e.g. ORD-173829..."
+                        required>
+                    <button type="submit" class="search-btn">Track</button>
+                </form>
+            </div>
+
+            <div id="error-section" class="error-message">
+                <strong>Order Not Found</strong><br>
+                Please check your Tracking ID and try again.
+            </div>
+
+            <div id="tracking-section" class="tracking-result-section">
+                <div class="order-header">
+                    <div>
+                        <h3>Order <span id="order-tracking-id">#ORD-000</span></h3>
+                        <span id="order-date">Dec 12, 2025</span>
                     </div>
-                    <div class="info-item">
-                        <div class="info-label">Order Status</div>
-                        <div class="info-value" id="order-status">-</div>
+                    <div id="order-status-badge"
+                        style="background: #d4af37; color: #1a1a1a; padding: 0.5rem 1rem; border-radius: 50px; font-weight: bold; text-transform: uppercase; font-size: 0.9rem;">
+                        Preparing
                     </div>
-                    <div class="info-item">
-                        <div class="info-label">Customer</div>
-                        <div class="info-value" id="order-customer">-</div>
+                </div>
+
+                <div class="order-info-grid">
+                    <div class="info-box">
+                        <span>Customer</span>
+                        <strong id="order-customer">John Doe</strong>
                     </div>
-                    <div class="info-item">
-                        <div class="info-label">Total Amount</div>
-                        <div class="info-value" id="order-total">-</div>
+                    <div class="info-box">
+                        <span>Total Amount</span>
+                        <strong id="order-total" style="color: #d4af37;">₦0.00</strong>
+                    </div>
+                </div>
+
+                <div class="timeline-container">
+                    <h3 style="margin-bottom: 1.5rem; font-family: 'Playfair Display', serif;">Order History</h3>
+                    <div class="timeline" id="timeline">
+                    </div>
+                </div>
+
+                <div class="order-items-list">
+                    <h3>Items Ordered</h3>
+                    <div id="order-items">
                     </div>
                 </div>
             </div>
 
-            <h3 style="margin-bottom: 1.5rem; color: #1a1a1a;">Order Timeline</h3>
-            <div class="timeline" id="timeline"></div>
-
-            <div class="items-list">
-                <h3>Order Items</h3>
-                <div id="order-items"></div>
+            <div style="text-align: center;">
+                <a href="menu.html" class="back-btn">&larr; Back to Menu</a>
             </div>
 
-            <a href="menu.html" class="back-btn">Back to Menu</a>
         </div>
     </div>
 
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>Sisi Alase</h2>
+                    <p>Exquisite dining in the heart of the city.</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-social">
+                    <h3>Follow Us</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom text-center">
+                <p>&copy; 2024 Sisi Alase Restaurant. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
     <script>
         const API_URL = 'http://localhost:8080/api';
 
         async function trackOrder(event) {
             event.preventDefault();
-
             const trackingId = document.getElementById('tracking-input').value.trim();
+            const errorDiv = document.getElementById('error-section');
+            const resultDiv = document.getElementById('tracking-section');
+
+            // Reset UI
+            errorDiv.style.display = 'none';
+            resultDiv.style.display = 'none';
+            resultDiv.classList.remove('show');
 
             try {
                 const response = await fetch(`${API_URL}/orders/tracking/${trackingId}`);
 
                 if (!response.ok) {
-                    showError();
-                    return;
+                    throw new Error('Order not found');
                 }
 
                 const data = await response.json();
@@ -364,85 +455,72 @@
 
             } catch (error) {
                 console.error('Error:', error);
-                showError();
+                errorDiv.style.display = 'block';
             }
         }
 
         function displayOrderDetails(data) {
             const { order, tracking } = data;
 
-            // Hide search and error, show tracking
-            document.querySelector('.search-section').style.display = 'none';
-            document.getElementById('error-section').style.display = 'none';
-            document.getElementById('tracking-section').classList.add('show');
+            // Show Section
+            const resultDiv = document.getElementById('tracking-section');
+            resultDiv.style.display = 'block';
+            // Small timeout to allow display:block to apply before adding class for animation
+            setTimeout(() => resultDiv.classList.add('show'), 10);
+            document.querySelector('.search-section').style.display = 'none'; // Optional: Hide search box on success
 
-            // Populate order details
+            // 1. Populate Header
             document.getElementById('order-tracking-id').textContent = order.tracking_id;
-            document.getElementById('order-status').textContent = formatStatus(order.status);
+            document.getElementById('order-date').textContent = new Date(order.created_at).toLocaleDateString();
+            document.getElementById('order-status-badge').textContent = order.status.replace('_', ' ');
             document.getElementById('order-customer').textContent = order.customer_name;
-            document.getElementById('order-total').textContent = `$${order.total_amount.toFixed(2)}`;
+            document.getElementById('order-total').textContent = `₦${order.total_amount.toLocaleString()}`;
 
-            // Display tracking timeline
+            // 2. Populate Timeline
             const timeline = document.getElementById('timeline');
-            timeline.innerHTML = tracking.map((item, index) => `
-                <div class="timeline-item ${index === 0 ? 'current' : ''}">
-                    <div class="timeline-content">
-                        <div class="timeline-status">${item.status}</div>
-                        ${item.location ? `<div class="timeline-location">📍 ${item.location}</div>` : ''}
-                        <div class="timeline-message">${item.update_message}</div>
-                        <div class="timeline-time">${formatDate(item.updated_at)}</div>
-                    </div>
-                </div>
-            `).join('');
+            if (tracking && tracking.length > 0) {
+                timeline.innerHTML = tracking.map((item, index) => {
+                    const date = new Date(item.updated_at);
+                    return `
+                        <div class="timeline-item ${index === 0 ? 'active' : ''}">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">${date.toLocaleDateString()} • ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                <h4>${item.status}</h4>
+                                <p>${item.update_message}</p>
+                                ${item.location ? `<p style="font-size:0.85rem; margin-top:0.2rem;"><i class="fas fa-map-marker-alt"></i> ${item.location}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                timeline.innerHTML = '<p>No tracking updates yet.</p>';
+            }
 
-            // Display order items
-            const items = JSON.parse(order.items);
+            // 3. Populate Items
             const itemsContainer = document.getElementById('order-items');
-            itemsContainer.innerHTML = items.map(item => `
-                <div class="item">
-                    <span>${item.title} x${item.quantity}</span>
-                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-            `).join('');
+            try {
+                const items = JSON.parse(order.items);
+                itemsContainer.innerHTML = items.map(item => `
+                    <div class="item-row">
+                        <span>${item.title} <span style="color:#999">x${item.quantity}</span></span>
+                        <span>₦${(item.price * item.quantity).toLocaleString()}</span>
+                    </div>
+                `).join('');
+            } catch (e) {
+                itemsContainer.innerHTML = '<p>Could not load items.</p>';
+            }
         }
 
-        function showError() {
-            document.querySelector('.search-section').style.display = 'none';
-            document.getElementById('tracking-section').classList.remove('show');
-            document.getElementById('error-section').style.display = 'block';
-        }
-
-        function resetTracking() {
-            document.querySelector('.search-section').style.display = 'block';
-            document.getElementById('error-section').style.display = 'none';
-            document.getElementById('tracking-section').classList.remove('show');
-            document.getElementById('tracking-input').value = '';
-        }
-
-        function formatStatus(status) {
-            return status.split('_').map(word =>
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        // Check if tracking ID is in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const trackingId = urlParams.get('id');
-        if (trackingId) {
-            document.getElementById('tracking-input').value = trackingId;
-            trackOrder(new Event('submit'));
-        }
+        // Auto-check URL
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+                document.getElementById('tracking-input').value = id;
+                trackOrder(new Event('submit'));
+            }
+        });
     </script>
 </body>
 
