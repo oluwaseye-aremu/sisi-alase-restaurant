@@ -4,21 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us | Lumière</title>
+    <title>About Us | Sisi Alase Restaurant</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
         rel="stylesheet">
+
+    <style>
+        .logo img {
+            max-height: 50px;
+            /* Limits the logo height so it fits in the navbar */
+            width: auto;
+            /* Maintains the correct shape (aspect ratio) */
+            vertical-align: middle;
+            /* Aligns it nicely with the text */
+            margin-right: 10px;
+            /* Adds a little space between image and text */
+        }
+
+        .logo {
+            display: flex;
+            /* Ensures image and text sit side-by-side perfectly */
+            align-items: center;
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- Top Bar -->
     <div class="top-bar">
         <div class="ticker-wrap">
             <div class="ticker">
-                <div class="ticker-item">Welcome to Lumière - Experience the finest dining in the city.</div>
+                <div class="ticker-item">Welcome to Sisi Alase Restaurant - Experience the finest dining in the city.
+                </div>
                 <div class="ticker-item">New Seasonal Menu Now Available!</div>
                 <div class="ticker-item">Live Jazz every Friday night.</div>
                 <div class="ticker-item">Book your private events with us today.</div>
@@ -26,10 +45,10 @@
         </div>
     </div>
 
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
-            <a href="index.html" class="logo">Lumière</a>
+            <a href="index.html" class="logo"><img src="/assets/sisi-alase-removebg-preview.png" alt=""><span>Sisi
+                    Alase</span></a>
             <button class="nav-toggle" aria-label="Toggle navigation">
                 <span class="hamburger"></span>
             </button>
@@ -50,7 +69,6 @@
         </div>
     </nav>
 
-    <!-- Section 1: Header -->
     <header class="page-header section bg-dark text-center" style="padding-top: 8rem; padding-bottom: 4rem;">
         <div class="container">
             <h1 class="text-white">Our Story</h1>
@@ -58,15 +76,14 @@
         </div>
     </header>
 
-    <!-- Section 2: The Beginning -->
     <section class="section">
         <div class="container">
             <div class="row">
                 <div class="col-text">
                     <h2 class="section-title">The Beginning</h2>
-                    <p>Lumière opened its doors in 1998 with a simple mission: to bring authentic, high-quality dining
-                        to our community. Started by two friends with a shared love for gastronomy, we have grown from a
-                        small bistro to a landmark destination.</p>
+                    <p>Sisi Alase Restaurant opened its doors in 2023 with a simple mission: to bring authentic,
+                        high-quality dining to our community. Started by two friends with a shared love for gastronomy,
+                        we have grown from a small bistro to a landmark destination.</p>
                 </div>
                 <div class="col-image">
                     <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -76,7 +93,6 @@
         </div>
     </section>
 
-    <!-- Section 3: Philosophy -->
     <section class="section bg-light">
         <div class="container text-center">
             <h2 class="section-title">Our Philosophy</h2>
@@ -86,18 +102,16 @@
         </div>
     </section>
 
-    <!-- Section 4: Meet the Team -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Meet the Team</h2>
             <div class="grid-3">
                 <div class="card">
                     <div class="card-img">
-                        <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                            alt="Chef">
+                        <img src=/assets/mary-ademola.jpeg alt="Chef">
                     </div>
                     <div class="card-body">
-                        <h3>Antoine De Rossi</h3>
+                        <h3>Peter Ayomide Mary </h3>
                         <p>Head Chef</p>
                     </div>
                 </div>
@@ -107,7 +121,7 @@
                             alt="Manager">
                     </div>
                     <div class="card-body">
-                        <h3>Elena Rodriguez</h3>
+                        <h3>Oluwabusi Victor</h3>
                         <p>General Manager</p>
                     </div>
                 </div>
@@ -117,7 +131,7 @@
                             alt="Sommelier">
                     </div>
                     <div class="card-body">
-                        <h3>Marcus Chen</h3>
+                        <h3>Sophia Peace</h3>
                         <p>Sommelier</p>
                     </div>
                 </div>
@@ -125,7 +139,6 @@
         </div>
     </section>
 
-    <!-- Section 5: Sourcing -->
     <section class="section bg-dark text-white">
         <div class="container">
             <div class="row reverse-mobile">
@@ -147,33 +160,31 @@
         </div>
     </section>
 
-    <!-- Section 6: Timeline -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Our Journey</h2>
             <div class="timeline"
                 style="max-width: 800px; margin: 0 auto; border-left: 2px solid var(--primary-color); padding-left: 2rem;">
                 <div class="timeline-item mb-2">
-                    <h3>1998</h3>
-                    <p>Lumière opens its doors.</p>
+                    <h3>2023</h3>
+                    <p>Sisi Alase opens its doors.</p>
                 </div>
                 <div class="timeline-item mb-2">
-                    <h3>2005</h3>
+                    <h3>2023</h3>
                     <p>Expanded to include a private dining room.</p>
                 </div>
                 <div class="timeline-item mb-2">
-                    <h3>2012</h3>
+                    <h3>2024</h3>
                     <p>Awarded our first Michelin Star.</p>
                 </div>
                 <div class="timeline-item">
-                    <h3>2023</h3>
-                    <p>Celebrated 25 years of excellence.</p>
+                    <h3>2025</h3>
+                    <p>Celebrated 3 years of excellence.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Section 7: Awards -->
     <section class="section bg-light">
         <div class="container text-center">
             <h2 class="section-title">Awards & Recognition</h2>
@@ -194,30 +205,20 @@
         </div>
     </section>
 
-    <!-- Section 8: Interior -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">The Ambiance</h2>
             <p class="text-center mb-2">Designed by award-winning architects, our space is a blend of modern elegance
                 and classic comfort.</p>
             <div class="gallery-grid">
-                <div class="gallery-item"><img
-                        src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                        alt="Interior 1"></div>
-                <div class="gallery-item"><img
-                        src="https://images.unsplash.com/photo-1559339352-11d035aa65de?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                        alt="Interior 2"></div>
-                <div class="gallery-item"><img
-                        src="https://images.unsplash.com/photo-1550966871-3ed3c47e2ce2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                        alt="Interior 3"></div>
-                <div class="gallery-item"><img
-                        src="https://images.unsplash.com/photo-1514362545857-3bc16549766b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-                        alt="Interior 4"></div>
+                <div class="gallery-item"><img src=/assets/ambience1.jpeg alt="Interior 1"></div>
+                <div class="gallery-item"><img src=/assets/ambience2.jpeg alt="Interior 2"></div>
+                <div class="gallery-item"><img src=/assets/ambience3.jpeg alt="Interior 3"></div>
+                <div class="gallery-item"><img src=/assets/ambience4.jpeg alt="Interior 4"></div>
             </div>
         </div>
     </section>
 
-    <!-- Section 9: Community -->
     <section class="section bg-accent text-white">
         <div class="container text-center">
             <h2 class="section-title text-white">Community</h2>
@@ -226,7 +227,6 @@
         </div>
     </section>
 
-    <!-- Section 10: FAQ -->
     <section class="section">
         <div class="container">
             <h2 class="section-title text-center">Frequently Asked Questions</h2>
@@ -245,12 +245,11 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
-                    <h2>Lumière</h2>
+                    <h2>Sisi Alase</h2>
                     <p>Exquisite dining in the heart of the city.</p>
                 </div>
                 <div class="footer-links">
@@ -272,7 +271,7 @@
                 </div>
             </div>
             <div class="footer-bottom text-center">
-                <p>&copy; 2024 Lumière Restaurant. All rights reserved.</p>
+                <p>&copy; 2024 Sisi Alase Restaurant. All rights reserved.</p>
             </div>
         </div>
     </footer>

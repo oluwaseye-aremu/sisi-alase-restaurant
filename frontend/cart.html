@@ -4,10 +4,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart | Lumière</title>
+    <title>Shopping Cart | Sisi Alase</title>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        .logo img {
+            max-height: 50px;
+            /* Limits the logo height so it fits in the navbar */
+            width: auto;
+            /* Maintains the correct shape (aspect ratio) */
+            vertical-align: middle;
+            /* Aligns it nicely with the text */
+            margin-right: 10px;
+            /* Adds a little space between image and text */
+        }
+
+        .logo {
+            display: flex;
+            /* Ensures image and text sit side-by-side perfectly */
+            align-items: center;
+        }
+
         .cart-container {
             max-width: 1000px;
             margin: 8rem auto 4rem;
@@ -196,7 +213,8 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
-            <a href="index.html" class="logo">Lumière</a>
+            <a href="index.html" class="logo"><img src="/assets/sisi-alase-removebg-preview.png" alt=""><span>Sisi
+                    Alase</span></a>
             <ul class="nav-links">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="menu.html">Menu</a></li>
