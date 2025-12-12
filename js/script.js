@@ -1,18 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Hero Slider
+    // Hero Slider - FIXED VERSION
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
     const slideInterval = 5000; // 5 seconds
 
     function nextSlide() {
         if (!slides.length) return; // Guard clause
+
+        console.log('Changing slide from', currentSlide, 'to', (currentSlide + 1) % slides.length); // Debug log
+
         slides[currentSlide].classList.remove('active');
         currentSlide = (currentSlide + 1) % slides.length;
         slides[currentSlide].classList.add('active');
     }
 
     if (slides.length > 0) {
+        console.log('Found', slides.length, 'slides. Starting slider...'); // Debug log
         setInterval(nextSlide, slideInterval);
+    } else {
+        console.error('No slides found!'); // Debug log
     }
 
     // Mobile Navigation

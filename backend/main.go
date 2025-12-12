@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net" // Added for IP tracking
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync" // Added for thread safety
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -19,9 +21,82 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
+	"golang.org/x/time/rate" // Added for Rate Limiting
 )
 
 var db *sql.DB
+
+// --- RATE LIMITING CONFIGURATION START ---
+// We create a "visitor" struct to track each user's request rate
+type visitor struct {
+	limiter  *rate.Limiter
+	lastSeen time.Time
+}
+
+// Map to hold visitors (IP addresses) and a mutex to lock it safely
+var visitors = make(map[string]*visitor)
+var mu sync.Mutex
+
+// Run a background worker to clean up old visitors (saves memory)
+func init() {
+	go cleanupVisitors()
+}
+
+func getVisitor(ip string) *rate.Limiter {
+	mu.Lock()
+	defer mu.Unlock()
+
+	v, exists := visitors[ip]
+	if !exists {
+		// LIMIT SETTINGS:
+		// 2 requests per second allowed on average
+		// Burst of 5 requests allowed at once (good for loading images/scripts quickly)
+		limiter := rate.NewLimiter(2, 5)
+
+		visitors[ip] = &visitor{limiter, time.Now()}
+		return limiter
+	}
+
+	// Update last seen time
+	v.lastSeen = time.Now()
+	return v.limiter
+}
+
+// Remove old IP addresses every minute to free up memory
+func cleanupVisitors() {
+	for {
+		time.Sleep(time.Minute)
+
+		mu.Lock()
+		for ip, v := range visitors {
+			if time.Since(v.lastSeen) > 3*time.Minute {
+				delete(visitors, ip)
+			}
+		}
+		mu.Unlock()
+	}
+}
+
+// Middleware: The "Bouncer" that checks every request
+func rateLimitMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Get the user's IP address
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			ip = r.RemoteAddr
+		}
+
+		limiter := getVisitor(ip)
+		if !limiter.Allow() {
+			http.Error(w, "Too Many Requests - Please wait a moment", http.StatusTooManyRequests)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// --- RATE LIMITING CONFIGURATION END ---
 
 // --- JWT CONFIGURATION ---
 // We declare the variable here, but we assign the value in main()
@@ -346,8 +421,9 @@ func initializePayment(w http.ResponseWriter, r *http.Request) {
 	paystackKey := os.Getenv("PAYSTACK_SECRET_KEY")
 
 	paymentData := map[string]interface{}{
-		"email":  req.Email,
-		"amount": amountInKobo,
+		"email":    req.Email,
+		"amount":   amountInKobo,
+		"currency": "NGN", // Explicitly using Naira
 	}
 
 	jsonData, _ := json.Marshal(paymentData)
@@ -544,30 +620,34 @@ func updateOrderTracking(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// 1. LOAD THE .ENV FILE FIRST
+	// Initialize database
+
+	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("Error loading .env file: %v", err) // <--- This prints the real reason
+		log.Printf("Error loading .env file: %v", err)
+	} else {
+		log.Println(".env file loaded successfully")
 	}
 
-	// 2. ASSIGN JWT KEY (Now that env is loaded)
+	// Fix: Load JWT key inside main()
 	jwtKey = []byte(os.Getenv("JWT_SECRET_KEY"))
 	if len(jwtKey) == 0 {
 		log.Println("Warning: JWT_SECRET_KEY is empty!")
 	}
 
-	// 3. INITIALIZE DATABASE
 	initDB()
 
 	router := mux.NewRouter()
+
+	// --- APPLY RATE LIMITING ---
+	// Wrap all routes with the rate limiter
+	router.Use(rateLimitMiddleware)
 
 	// --- PUBLIC API ROUTES ---
 	router.HandleFunc("/api/menu", getMenuItems).Methods("GET")
 	router.HandleFunc("/api/orders", createOrder).Methods("POST")
 	router.HandleFunc("/api/orders/tracking/{tracking_id}", getOrderByTracking).Methods("GET")
-
-	// Paystack Payment Routes
-	// Note: You had mapped create-intent to verifyPayment, I added both initialize and verify
 	router.HandleFunc("/api/payment/initialize", initializePayment).Methods("POST")
 	router.HandleFunc("/api/payment/verify", verifyPayment).Methods("GET")
 
@@ -582,6 +662,12 @@ func main() {
 
 	// Serve uploaded images
 	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
+
+	// Serve Frontend files (Important for Ngrok/Production)
+	// Assumes "frontend" folder is a sibling to "backend"
+	// If you are NOT using ngrok with the backend-serving-frontend setup, you can remove this line.
+	// But it is safer to keep it.
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("../frontend")))
 
 	// CORS
 	c := cors.New(cors.Options{

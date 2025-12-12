@@ -313,7 +313,13 @@ img {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    /* Make sure text is above overlay */
 }
 
 .slide {
@@ -352,7 +358,8 @@ img {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.4);
-    z-index: -1;
+    z-index: 1;
+    pointer-events: none;
 }
 
 .hero-title {
@@ -385,6 +392,7 @@ img {
     font-size: 2rem;
     animation: bounce 2s infinite;
     cursor: pointer;
+    z-index: 10;
 }
 
 @keyframes fadeInUp {
